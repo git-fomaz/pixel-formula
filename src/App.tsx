@@ -7,6 +7,7 @@ import Predict from './pages/Predict';
 import Collection from './pages/Collection';
 import Calendar from './pages/Calendar';
 import Profile from './pages/Profile';
+import Reward from './pages/Reward';
 import './App.css';
 
 function App() {
@@ -40,6 +41,7 @@ function App() {
         <nav className="pixel-nav">
           <NavLink to="/" end>Home</NavLink>
           <NavLink to="/predict">Прогноз</NavLink>
+          <NavLink to="/reward">Награда</NavLink>
           <NavLink to="/collection">Коллекция</NavLink>
           <NavLink to="/calendar">Календарь</NavLink>
           <NavLink to="/leaderboard">Таблица</NavLink>
@@ -49,6 +51,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/predict" element={<Predict />} />
+            <Route path="/reward" element={<Reward />} />
             <Route path="/league" element={<League />} />
             <Route path="/collection" element={<Collection />} />
             <Route path="/calendar" element={<Calendar />} />
