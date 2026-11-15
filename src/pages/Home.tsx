@@ -1,35 +1,18 @@
 import { useState, useEffect } from 'react';
-import { getNextRace, RACES, calculateTeamPoints } from '../data/f1Data';
-
-const TEAM_KEY = 'pixel-formula-team';
+import { Link } from 'react-router-dom';
+import { getNextRace, RACES } from '../data/f1Data';
 
 export default function Home() {
   const [user, setUser] = useState<any>(null);
-  const [teamPoints, setTeamPoints] = useState(0);
-  const [hasTeam, setHasTeam] = useState(false);
   const nextRace = getNextRace();
 
   useEffect(() => {
     try {
       const tg = (window as any).Telegram?.WebApp;
-      if (tg?.initDataUnsafe?.user) {
-        setUser(tg.initDataUnsafe.user);
-      } else {
-        setUser({ first_name: 'Guest', id: 0 });
-      }
+      if (tg?.initDataUnsafe?.user) setUser(tg.initDataUnsafe.user);
+      else setUser({ first_name: 'Guest', id: 0 });
     } catch {
       setUser({ first_name: 'Guest', id: 0 });
-    }
-
-    const stored = localStorage.getItem(TEAM_KEY);
-    if (stored) {
-      try {
-        const ids: number[] = JSON.parse(stored);
-        if (ids.length === 2) {
-          setHasTeam(true);
-          setTeamPoints(calculateTeamPoints(ids));
-        }
-      } catch {}
     }
   }, []);
 
@@ -43,28 +26,15 @@ export default function Home() {
       <h2>Добро пожаловать{user ? `, ${user.first_name}` : ''}!</h2>
 
       <div className="pixel-card">
-        <h3>Твои очки</h3>
-        {hasTeam ? (
-          <>
-            <p style={{ fontSize: '1.4rem', color: '#ff2e63', margin: '8px 0' }}>
-              {teamPoints}
-            </p>
-            <p style={{ fontSize: '0.65rem', color: '#8888aa' }}>
-              За последнюю гонку (мок)
-            </p>
-          </>
-        ) : (
-          <p>Выбери состав на экране «Команда», чтобы получать очки</p>
-        )}
-      </div>
-
-      <div className="pixel-card">
         <p>Pixel Formula — фэнтези Формула-1 прямо в Telegram.</p>
         <ul>
-          <li>Создавай и вступай в лиги</li>
-          <li>Выбирай пилотов на гонку</li>
+          <li>Делай прогнозы на топ-5</li>
+          <li>Собирай пиксельные карточки</li>
           <li>Набирай очки и поднимайся в таблице</li>
         </ul>
+        <Link to="/predict" className="pixel-btn primary" style={{ display: 'inline-block', marginTop: 8, textDecoration: 'none' }}>
+          Сделать прогноз
+        </Link>
       </div>
 
       <div className="pixel-card">
