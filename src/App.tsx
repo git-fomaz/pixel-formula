@@ -4,6 +4,10 @@ import Home from './pages/Home';
 import League from './pages/League';
 import Team from './pages/Team';
 import Leaderboard from './pages/Leaderboard';
+import Predict from './pages/Predict';
+import Collection from './pages/Collection';
+import Calendar from './pages/Calendar';
+import Profile from './pages/Profile';
 import './App.css';
 
 function App() {
@@ -24,8 +28,6 @@ function App() {
       } catch (e) {
         console.log('Not running inside Telegram');
       }
-    } else {
-      console.log('Running in browser mode (not Telegram)');
     }
   }, []);
 
@@ -34,20 +36,27 @@ function App() {
       <div className="app">
         <header className="pixel-header">
           <h1>PIXEL FORMULA</h1>
-          <p>Fantasy F1</p>
+          <p>Fantasy F1 · Beta Merge</p>
         </header>
         <nav className="pixel-nav">
           <NavLink to="/" end>Home</NavLink>
-          <NavLink to="/league">Лига</NavLink>
+          <NavLink to="/predict">Прогноз</NavLink>
           <NavLink to="/team">Команда</NavLink>
+          <NavLink to="/collection">Коллекция</NavLink>
+          <NavLink to="/calendar">Календарь</NavLink>
           <NavLink to="/leaderboard">Таблица</NavLink>
+          <NavLink to="/profile">Профиль</NavLink>
         </nav>
         <main>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/predict" element={<Predict />} />
             <Route path="/league" element={<League />} />
             <Route path="/team" element={<Team />} />
+            <Route path="/collection" element={<Collection />} />
+            <Route path="/calendar" element={<Calendar />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </main>
       </div>
