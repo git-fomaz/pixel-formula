@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import Home from './pages/Home';
 import League from './pages/League';
-import Team from './pages/Team';
 import Leaderboard from './pages/Leaderboard';
 import Predict from './pages/Predict';
 import Collection from './pages/Collection';
@@ -41,7 +40,6 @@ function App() {
         <nav className="pixel-nav">
           <NavLink to="/" end>Home</NavLink>
           <NavLink to="/predict">Прогноз</NavLink>
-          <NavLink to="/team">Команда</NavLink>
           <NavLink to="/collection">Коллекция</NavLink>
           <NavLink to="/calendar">Календарь</NavLink>
           <NavLink to="/leaderboard">Таблица</NavLink>
@@ -52,7 +50,6 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/predict" element={<Predict />} />
             <Route path="/league" element={<League />} />
-            <Route path="/team" element={<Team />} />
             <Route path="/collection" element={<Collection />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
