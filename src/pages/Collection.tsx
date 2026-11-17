@@ -27,7 +27,7 @@ const rarityColor: Record<string, string> = {
 };
 
 export default function Collection() {
-  const [view, setView] = useState<'catalog' | 'owned'>('catalog');
+  const [view, setView] = useState<'catalog' | 'owned'>('owned');
   const [mode, setMode] = useState<'live' | 'demo'>('live');
   const [rarity, setRarity] = useState<Rarity>('all');
   const [detail, setDetail] = useState<(typeof PF_CARDS)[0] | null>(null);
@@ -53,7 +53,7 @@ export default function Collection() {
   return (
     <div className="pixel-page">
       <h2>Коллекция</h2>
-      <p className="muted">Каталог из {PF_CARDS.length} карточек</p>
+      <p className="muted">Только полученные карточки</p>
 
       <div className="ios-card">
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
