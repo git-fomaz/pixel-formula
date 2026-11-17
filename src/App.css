@@ -1,13 +1,30 @@
-/* Pixel Formula styles */
+/* Pixel Formula — Modern iOS-style design */
+
 :root {
-  --pixel-bg: #0f0f1a;
-  --pixel-card: #1a1a2e;
-  --pixel-border: #3a3a5c;
-  --pixel-accent: #ff2e63;
-  --pixel-accent-2: #08d9d6;
-  --pixel-text: #eaeaea;
-  --pixel-muted: #8888aa;
-  font-family: 'Press Start 2P', 'Courier New', monospace;
+  --bg: #000000;
+  --bg-elevated: #1c1c1e;
+  --bg-secondary: #2c2c2e;
+  --bg-tertiary: #3a3a3c;
+  --separator: rgba(84, 84, 88, 0.65);
+  --label: #ffffff;
+  --label-secondary: rgba(235, 235, 245, 0.6);
+  --label-tertiary: rgba(235, 235, 245, 0.3);
+  --accent: #0a84ff;
+  --accent-red: #ff453a;
+  --accent-green: #30d158;
+  --accent-orange: #ff9f0a;
+  --accent-yellow: #ffd60a;
+  --fill: rgba(120, 120, 128, 0.2);
+  --fill-secondary: rgba(120, 120, 128, 0.16);
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.25);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
@@ -16,153 +33,293 @@
 
 body {
   margin: 0;
-  background: var(--pixel-bg);
-  color: var(--pixel-text);
+  background: var(--bg);
+  color: var(--label);
   min-height: 100vh;
+  font-size: 17px;
+  line-height: 1.4;
 }
 
 .app {
   max-width: 480px;
   margin: 0 auto;
-  padding: 12px;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
 }
 
 .pixel-header {
-  text-align: center;
-  padding: 16px 0;
-  border-bottom: 4px solid var(--pixel-border);
+  padding: 16px 20px 8px;
+  text-align: left;
 }
 
 .pixel-header h1 {
   margin: 0;
-  font-size: 1.4rem;
-  color: var(--pixel-accent);
-  text-shadow: 2px 2px 0 #000;
-  letter-spacing: 2px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--label);
 }
 
 .pixel-header p {
-  margin: 4px 0 0;
-  font-size: 0.7rem;
-  color: var(--pixel-accent-2);
+  margin: 2px 0 0;
+  font-size: 15px;
+  color: var(--label-secondary);
+  font-weight: 400;
 }
 
 .pixel-nav {
   display: flex;
-  gap: 8px;
-  padding: 12px 0;
-  border-bottom: 4px solid var(--pixel-border);
-  flex-wrap: wrap;
-  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.pixel-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .pixel-nav a {
-  color: var(--pixel-text);
+  flex: 0 0 auto;
+  color: var(--label-secondary);
   text-decoration: none;
-  padding: 8px 12px;
-  border: 3px solid var(--pixel-border);
-  background: var(--pixel-card);
-  font-size: 0.65rem;
-  image-rendering: pixelated;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--fill);
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 .pixel-nav a.active,
 .pixel-nav a:hover {
-  border-color: var(--pixel-accent);
-  color: var(--pixel-accent);
-  background: #2a2a4a;
-}
-
-.pixel-page {
-  padding: 16px 0;
-}
-
-.pixel-page h2 {
-  font-size: 1rem;
-  margin-bottom: 12px;
-  color: var(--pixel-accent-2);
-}
-
-.pixel-card {
-  background: var(--pixel-card);
-  border: 4px solid var(--pixel-border);
-  padding: 12px;
-  margin-bottom: 12px;
-  box-shadow: 4px 4px 0 #000;
-}
-
-.pixel-btn {
-  background: var(--pixel-card);
-  color: var(--pixel-text);
-  border: 3px solid var(--pixel-border);
-  padding: 10px 16px;
-  font-family: inherit;
-  font-size: 0.65rem;
-  cursor: pointer;
-  box-shadow: 3px 3px 0 #000;
-}
-
-.pixel-btn:hover,
-.pixel-btn:active {
-  transform: translate(1px, 1px);
-  box-shadow: 2px 2px 0 #000;
-}
-
-.pixel-btn.primary {
-  background: var(--pixel-accent);
-  border-color: #ff5a7a;
+  background: var(--accent);
   color: #fff;
 }
 
-.drivers-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+main {
+  flex: 1;
+  padding: 0 16px 100px;
 }
 
-.driver-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.pixel-page {
+  padding: 8px 0 24px;
 }
 
-.driver-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 0.7rem;
+.pixel-page h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 16px;
+  letter-spacing: -0.3px;
 }
 
-.driver-card.selected {
-  background: #2a2a4a;
-  box-shadow: 4px 4px 0 #000, inset 0 0 0 2px currentColor;
+.pixel-card,
+.ios-card {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-soft);
+  border: 0.5px solid var(--separator);
 }
 
-.driver-tag {
-  display: inline-block;
-  padding: 4px 8px;
-  border: 2px solid;
-  font-size: 0.6rem;
-  background: #1a1a2e;
-}
-
-.pixel-table {
+.pixel-btn,
+.ios-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 20px;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
   width: 100%;
-  border-collapse: collapse;
-  font-size: 0.7rem;
+  text-align: center;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pixel-btn:active,
+.ios-btn:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+
+.pixel-btn.secondary,
+.ios-btn.secondary {
+  background: var(--fill);
+  color: var(--accent);
+}
+
+.pixel-btn.primary {
+  background: var(--accent);
+}
+
+/* Bottom tab bar */
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: rgba(28, 28, 30, 0.82);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 0.5px solid var(--separator);
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+  z-index: 100;
+}
+
+.tab-bar a {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: var(--label-secondary);
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 4px 0;
+  transition: color 0.2s ease;
+}
+
+.tab-bar a.active {
+  color: var(--accent);
+}
+
+.tab-bar .icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* Form controls */
+select,
+input[type="text"] {
+  width: 100%;
+  background: var(--bg-secondary);
+  color: var(--label);
+  border: none;
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-family: inherit;
+  font-size: 17px;
+  outline: none;
+}
+
+select:focus,
+input:focus {
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.4);
+}
+
+/* Tables */
+.pixel-table,
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 15px;
 }
 
 .pixel-table th,
-.pixel-table td {
-  padding: 8px 4px;
+table th {
   text-align: left;
-  border-bottom: 2px solid var(--pixel-border);
+  color: var(--label-secondary);
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 12px;
 }
 
-.pixel-table .highlight {
-  background: #2a2a4a;
-  color: var(--pixel-accent);
+.pixel-table td,
+table td {
+  padding: 12px;
+  border-bottom: 0.5px solid var(--separator);
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+.pixel-table .highlight,
+tr.me {
+  background: rgba(10, 132, 255, 0.15);
+}
+
+/* Cards grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.card-item {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 0.5px solid var(--separator);
+  transition: transform 0.2s ease;
+}
+
+.card-item:active {
+  transform: scale(0.97);
+}
+
+.card-item img {
+  width: 100%;
+  display: block;
+}
+
+.card-item .meta {
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+/* Stats */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.stat-box {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  text-align: center;
+}
+
+.stat-box strong {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.stat-box small {
+  color: var(--label-secondary);
+  font-size: 13px;
+}
+
+/* Utility */
+.muted {
+  color: var(--label-secondary);
+  font-size: 15px;
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--label-secondary);
+  margin: 20px 0 8px;
+}
