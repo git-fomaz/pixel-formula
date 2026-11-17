@@ -35,18 +35,10 @@ function App() {
     <BrowserRouter>
       <div className="app">
         <header className="pixel-header">
-          <h1>PIXEL FORMULA</h1>
-          <p>Fantasy F1 · Beta Merge</p>
+          <h1>Pixel Formula</h1>
+          <p>Fantasy F1</p>
         </header>
-        <nav className="pixel-nav">
-          <NavLink to="/" end>Home</NavLink>
-          <NavLink to="/predict">Прогноз</NavLink>
-          <NavLink to="/reward">Награда</NavLink>
-          <NavLink to="/collection">Коллекция</NavLink>
-          <NavLink to="/calendar">Календарь</NavLink>
-          <NavLink to="/leaderboard">Таблица</NavLink>
-          <NavLink to="/profile">Профиль</NavLink>
-        </nav>
+
         <main>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -59,6 +51,29 @@ function App() {
             <Route path="/profile" element={<Profile />} />
           </Routes>
         </main>
+
+        <nav className="tab-bar">
+          <NavLink to="/" end>
+            <span className="icon">🏠</span>
+            Home
+          </NavLink>
+          <NavLink to="/predict">
+            <span className="icon">🏁</span>
+            Прогноз
+          </NavLink>
+          <NavLink to="/reward">
+            <span className="icon">🎁</span>
+            Награда
+          </NavLink>
+          <NavLink to="/collection">
+            <span className="icon">🃏</span>
+            Карты
+          </NavLink>
+          <NavLink to="/profile">
+            <span className="icon">👤</span>
+            Профиль
+          </NavLink>
+        </nav>
       </div>
     </BrowserRouter>
   );
