@@ -54,10 +54,10 @@ function saveAward(key: string, award: any) {
 }
 
 const rarityColor: Record<string, string> = {
-  Basic: '#c4d6ec',
-  Rare: '#ffd35b',
-  Unique: '#c775ff',
-  Masterpiece: '#ffb52e',
+  Basic: '#8e8e93',
+  Rare: '#ffd60a',
+  Unique: '#bf5af2',
+  Masterpiece: '#ff9f0a',
 };
 
 export default function Reward() {
@@ -98,7 +98,7 @@ export default function Reward() {
       const award = { cardId: card.id, demo: true, at: new Date().toISOString() };
       saveAward(current.key, award);
       setOpened(award);
-      setStatus('Карточка сохранена. Повторное открытие не меняет награду.');
+      setStatus('Карточка сохранена');
       setBusy(false);
     }, 700);
   };
@@ -110,90 +110,122 @@ export default function Reward() {
   }, [opened]);
 
   return (
-    <div style={{ maxWidth: 680, margin: '0 auto', padding: '18px 16px', color: '#f5eedc', fontFamily: 'monospace' }}>
-      <div style={{ color: '#e7c764' }}>PIXEL FORMULA / REWARDS</div>
-      <h1 style={{ fontSize: 'clamp(24px,7vw,38px)', margin: '12px 0' }}>Награда за гонку</h1>
-      <p style={{ color: '#acc0d7', fontSize: 13 }}>Локальный прототип. Результаты и выдача пока не подтверждаются сервером.</p>
+    <div className="pixel-page">
+      <h2>Награда</h2>
+      <p className="muted">Локальный прототип. Результаты пока не подтверждаются сервером.</p>
 
-      <section style={panel}>
-        <h2>Демо открытия</h2>
-        <p style={{ color: '#acc0d7', fontSize: 13 }}>Тестовые награды хранятся отдельно от наград за этапы.</p>
-        <label>Точные позиции<br />
-          <select value={hits} onChange={e => setHits(Number(e.target.value))} style={sel}>
-            {[0,1,2,3,4,5].map(n => <option key={n} value={n}>{n} из 5</option>)}
-          </select>
-        </label>
-        <button onClick={startDemo} style={btn}>Начать новый демо-заезд</button>
-      </section>
+      <div className="ios-card">
+        <div style={{ fontWeight: 600, marginBottom: 4 }}>Демо открытия</div>
+        <p className="muted" style={{ marginTop: 0 }}>Тестовые награды хранятся отдельно от наград за этапы.</p>
+        <label className="muted" style={{ fontSize: 13 }}>Точные позиции</label>
+        <select value={hits} onChange={e => setHits(Number(e.target.value))} style={{ marginTop: 6, marginBottom: 12 }}>
+          {[0,1,2,3,4,5].map(n => <option key={n} value={n}>{n} из 5</option>)}
+        </select>
+        <button onClick={startDemo} className="ios-btn">Начать новый демо-заезд</button>
+      </div>
 
       {current && (
-        <section style={panel}>
-          <h2>{current.raceName}</h2>
-          <p>Точно угадано: {current.hits} из 5.</p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, margin: '12px 0' }}>
+        <div className="ios-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ fontWeight: 700 }}>{current.raceName}</div>
+            <span style={{
+              background: 'rgba(10, 132, 255, 0.2)',
+              color: 'var(--accent)',
+              padding: '4px 10px',
+              borderRadius: 999,
+              fontSize: 13,
+              fontWeight: 600,
+            }}>{current.hits} / 5</span>
+          </div>
+
+          <div className="section-title">Шансы</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             {(['Basic','Rare','Unique','Masterpiece'] as Rarity[]).map(r => (
-              <div key={r} style={{ border: '1px solid #62758c', padding: 12, color: rarityColor[r] }}>
-                {r}<strong style={{ display: 'block', marginTop: 8, fontSize: 23 }}>{rates[r].toLocaleString('ru-RU', { maximumFractionDigits: 2 })}%</strong>
+              <div key={r} style={{
+                background: 'var(--bg-secondary)',
+                borderRadius: 12,
+                padding: 12,
+                color: rarityColor[r],
+              }}>
+                <div style={{ fontSize: 13, opacity: 0.8 }}>{r}</div>
+                <div style={{ fontSize: 22, fontWeight: 700, marginTop: 4 }}>
+                  {rates[r].toLocaleString('ru-RU', { maximumFractionDigits: 2 })}%
+                </div>
               </div>
             ))}
           </div>
-          <p style={{ color: '#acc0d7', fontSize: 13 }}>Сначала выбирается редкость, затем с равным шансом — одна из карточек этой категории. Повторы возможны.</p>
+          <p className="muted" style={{ marginTop: 12, marginBottom: 16, fontSize: 13 }}>
+            Сначала выбирается редкость, затем с равным шансом — одна из карточек этой категории. Повторы возможны.
+          </p>
 
-          <div style={{ display: 'grid', placeItems: 'center', minHeight: 280, padding: '20px 0' }}>
+          <div style={{ display: 'grid', placeItems: 'center', minHeight: 260, margin: '8px 0' }}>
             {!card && (
               <div style={{
-                width: 'min(240px,70vw)', aspectRatio: '2/3', border: '6px double #f1e8cf',
-                background: 'repeating-linear-gradient(45deg,#102b4d 0 18px,#173b62 18px 36px)',
-                display: 'grid', placeContent: 'center', textAlign: 'center', boxShadow: '8px 8px #020914',
-                fontSize: 28, lineHeight: 1.5, animation: busy ? 'shake .22s infinite' : undefined,
+                width: 'min(220px, 70vw)',
+                aspectRatio: '2/3',
+                borderRadius: 20,
+                background: 'linear-gradient(145deg, #2c2c2e, #1c1c1e)',
+                border: '1px solid var(--separator)',
+                display: 'grid',
+                placeContent: 'center',
+                textAlign: 'center',
+                boxShadow: 'var(--shadow)',
+                fontSize: 22,
+                fontWeight: 700,
+                letterSpacing: 1,
+                animation: busy ? 'pulse 0.6s ease-in-out infinite' : undefined,
               }}>
-                PF<br />RACE<br />REWARD
+                <div>PF</div>
+                <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--label-secondary)', marginTop: 4 }}>REWARD</div>
               </div>
             )}
             {card && (
-              <div style={{ textAlign: 'center', color: rarityColor[card.rarity] }}>
+              <div style={{ textAlign: 'center', maxWidth: 280 }}>
                 <img src={card.image} alt={card.name} style={{
-                  display: 'block', width: 'min(100%,350px)', height: 'auto',
+                  width: '100%',
+                  borderRadius: 16,
                   border: `2px solid ${rarityColor[card.rarity]}`,
-                  boxShadow: `0 0 25px ${rarityColor[card.rarity]}66`,
+                  boxShadow: `0 8px 32px ${rarityColor[card.rarity]}40`,
+                  display: 'block',
                 }} />
-                <h2>{card.name}</h2>
-                <p>{card.rarity}</p>
+                <div style={{ fontWeight: 700, fontSize: 20, marginTop: 12 }}>{card.name}</div>
+                <div style={{ color: rarityColor[card.rarity], fontWeight: 600, marginTop: 2 }}>{card.rarity}</div>
               </div>
             )}
           </div>
-          <div style={{ minHeight: 24, color: '#f3cc77' }}>{status}</div>
-          <button onClick={openReward} disabled={!!opened || busy} style={{ ...btn, opacity: opened || busy ? 0.5 : 1 }}>
-            {opened ? 'Награда получена' : 'Открыть награду'}
+
+          {status && <p style={{ textAlign: 'center', color: 'var(--accent-green)', fontWeight: 500, margin: '8px 0' }}>{status}</p>}
+
+          <button onClick={openReward} disabled={!!opened || busy} className="ios-btn" style={{ opacity: opened || busy ? 0.5 : 1 }}>
+            {opened ? 'Награда получена' : busy ? 'Открываем…' : 'Открыть награду'}
           </button>
-        </section>
+        </div>
       )}
 
-      <section style={panel}>
-        <h2>Демо-коллекция</h2>
-        {awards.length === 0 && <p style={{ color: '#acc0d7' }}>Здесь появятся открытые карточки.</p>}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12 }}>
+      <div className="section-title">Демо-коллекция</div>
+      <div className="ios-card">
+        {awards.length === 0 && <p className="muted" style={{ margin: 0 }}>Здесь появятся открытые карточки.</p>}
+        <div className="card-grid">
           {awards.map((a: any, i) => {
             const c = PF_CARDS.find(x => x.id === a.cardId);
             if (!c) return null;
             return (
-              <div key={i}>
-                <img src={c.image} alt={c.name} style={{ width: '100%', display: 'block' }} />
-                <p style={{ fontSize: 11, margin: '5px 0' }}>{c.name} / {c.rarity}</p>
+              <div key={i} className="card-item">
+                <img src={c.image} alt={c.name} />
+                <div className="meta">
+                  <div style={{ fontWeight: 600 }}>{c.name}</div>
+                  <div style={{ color: rarityColor[c.rarity], fontSize: 12 }}>{c.rarity}</div>
+                </div>
               </div>
             );
           })}
         </div>
-      </section>
+      </div>
 
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-        <Link to="/predict" style={btn}>К прогнозу</Link>
-        <Link to="/collection" style={{ ...btn, background: '#142e4c', color: '#f5eedc' }}>Коллекция</Link>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <Link to="/predict" className="ios-btn secondary">К прогнозу</Link>
+        <Link to="/collection" className="ios-btn secondary">Коллекция</Link>
       </div>
     </div>
   );
 }
-
-const panel: React.CSSProperties = { background: '#10253e', border: '2px solid #72869d', padding: 18, margin: '18px 0', boxShadow: '5px 5px #020914' };
-const btn: React.CSSProperties = { padding: '12px 16px', border: '2px solid #f1e8cf', background: '#e7c764', color: '#071426', cursor: 'pointer', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', font: 'inherit', minHeight: 48 };
-const sel: React.CSSProperties = { background: '#071426', color: '#fff', padding: 8, width: '100%', marginBottom: 10, font: 'inherit' };
