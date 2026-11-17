@@ -23,6 +23,14 @@ export default function Home() {
 
   return (
     <div className="pixel-page">
+      <div style={{ margin: '0 -16px 16px', borderRadius: 0 }}>
+        <img
+          src="/header-banner.jpg"
+          alt="Pixel Formula — Champions Lineup"
+          style={{ width: '100%', display: 'block', imageRendering: 'pixelated', borderRadius: 0 }}
+        />
+      </div>
+
       <h2>Привет{user ? `, ${user.first_name}` : ''}!</h2>
 
       <div className="ios-card">
