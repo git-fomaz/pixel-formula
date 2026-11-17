@@ -323,3 +323,8 @@ tr.me {
   color: var(--label-secondary);
   margin: 20px 0 8px;
 }
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
