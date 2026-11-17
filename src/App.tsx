@@ -68,6 +68,10 @@ function App() {
             <span className="icon">🃏</span>
             Карты
           </NavLink>
+          <NavLink to="/leaderboard">
+            <span className="icon">🏆</span>
+            Таблица
+          </NavLink>
           <NavLink to="/profile">
             <span className="icon">👤</span>
             Профиль
