@@ -20,10 +20,10 @@ function loadOwned(isDemo: boolean): Set<string> {
 }
 
 const rarityColor: Record<string, string> = {
-  Basic: '#bed0e6',
-  Rare: '#ffd168',
-  Unique: '#ca83ff',
-  Masterpiece: '#ffb145',
+  Basic: '#8e8e93',
+  Rare: '#ffd60a',
+  Unique: '#bf5af2',
+  Masterpiece: '#ff9f0a',
 };
 
 export default function Collection() {
@@ -51,71 +51,62 @@ export default function Collection() {
   }, [owned]);
 
   return (
-    <div style={{ maxWidth: 840, margin: '0 auto', padding: '18px 14px', color: '#f4eedc', fontFamily: 'monospace' }}>
-      <p style={{ color: '#b2c4d9', fontSize: 12 }}>PIXEL FORMULA / COLLECTION</p>
-      <h1 style={{ margin: '8px 0' }}>Коллекция карточек</h1>
-      <p style={{ color: '#b2c4d9', fontSize: 12 }}>Каталог из {PF_CARDS.length} карточек. Просмотр не выдаёт наград.</p>
+    <div className="pixel-page">
+      <h2>Коллекция</h2>
+      <p className="muted">Каталог из {PF_CARDS.length} карточек</p>
 
-      <section style={{ background: '#10253e', border: '2px solid #7b8ea3', padding: 16, margin: '20px 0', boxShadow: '5px 5px #020915' }}>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <label>Показать<br />
-            <select value={view} onChange={e => setView(e.target.value as any)} style={sel}>
-              <option value="catalog">Весь каталог</option>
-              <option value="owned">Только полученные</option>
-            </select>
-          </label>
-          <label>Режим<br />
-            <select value={mode} onChange={e => setMode(e.target.value as any)} style={sel}>
-              <option value="live">Настоящие награды</option>
-              <option value="demo">Тестовые награды</option>
-            </select>
-          </label>
-          <label>Редкость<br />
-            <select value={rarity} onChange={e => setRarity(e.target.value as Rarity)} style={sel}>
-              <option value="all">Все</option>
-              <option>Basic</option>
-              <option>Rare</option>
-              <option>Unique</option>
-              <option>Masterpiece</option>
-            </select>
-          </label>
+      <div className="ios-card">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+          <select value={view} onChange={e => setView(e.target.value as any)}>
+            <option value="catalog">Весь каталог</option>
+            <option value="owned">Полученные</option>
+          </select>
+          <select value={mode} onChange={e => setMode(e.target.value as any)}>
+            <option value="live">Настоящие</option>
+            <option value="demo">Демо</option>
+          </select>
+          <select value={rarity} onChange={e => setRarity(e.target.value as Rarity)}>
+            <option value="all">Все</option>
+            <option>Basic</option>
+            <option>Rare</option>
+            <option>Unique</option>
+            <option>Masterpiece</option>
+          </select>
         </div>
-        <p style={{ color: '#e3c16b', marginTop: 12 }}>
-          Получено: {stats.distinct} / {PF_CARDS.length} · Basic {stats.counts.Basic} · Rare {stats.counts.Rare} · Unique {stats.counts.Unique} · Masterpiece {stats.counts.Masterpiece}
+        <p style={{ color: 'var(--accent)', marginTop: 12, marginBottom: 0, fontWeight: 600 }}>
+          Получено: {stats.distinct} / {PF_CARDS.length}
         </p>
-        {filtered.length === 0 && <p style={{ color: '#b2c4d9' }}>Нет карточек по выбранным условиям.</p>}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 14, marginTop: 12 }}>
-          {filtered.map(card => (
-            <button key={card.id} onClick={() => setDetail(card)} style={{
-              padding: 0, border: `2px solid ${rarityColor[card.rarity]}`, background: '#142e4c', cursor: 'pointer', textAlign: 'left', color: '#f4eedc'
-            }}>
-              <img src={card.image} alt={card.name} style={{ width: '100%', display: 'block' }} />
-              <span style={{ display: 'block', padding: 7, fontSize: 11 }}>
-                {card.name}<br />
-                <b style={{ color: rarityColor[card.rarity] }}>{card.rarity}</b>
-                {owned.has(card.id) && <span style={{ marginLeft: 6, color: '#c8e889' }}>✓</span>}
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
+      </div>
+
+      {filtered.length === 0 && <p className="muted">Нет карточек по выбранным условиям.</p>}
+
+      <div className="card-grid">
+        {filtered.map(card => (
+          <button key={card.id} onClick={() => setDetail(card)} className="card-item" style={{ borderColor: rarityColor[card.rarity], cursor: 'pointer', textAlign: 'left', color: 'inherit', padding: 0 }}>
+            <img src={card.image} alt={card.name} />
+            <div className="meta">
+              <div style={{ fontWeight: 600 }}>{card.name}</div>
+              <div style={{ color: rarityColor[card.rarity], fontSize: 12 }}>{card.rarity}</div>
+              {owned.has(card.id) && <span style={{ color: 'var(--accent-green)', fontSize: 12 }}>✓ в коллекции</span>}
+            </div>
+          </button>
+        ))}
+      </div>
 
       {detail && (
         <div style={{
-          position: 'fixed', inset: 0, background: '#000c', display: 'grid', placeItems: 'center', zIndex: 50
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'grid', placeItems: 'center', zIndex: 200,
+          backdropFilter: 'blur(8px)',
         }} onClick={() => setDetail(null)}>
-          <div style={{ background: '#10253e', border: '2px solid #e3c16b', padding: 12, width: 'min(92vw, 520px)', maxHeight: '90dvh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
-            <button onClick={() => setDetail(null)} style={{ ...btn, marginBottom: 8 }}>Закрыть</button>
-            <img src={detail.image} alt={detail.name} style={{ width: '100%', display: 'block' }} />
-            <h2 style={{ margin: '12px 0 4px' }}>{detail.name}</h2>
-            <p style={{ color: rarityColor[detail.rarity] }}>{detail.rarity}</p>
-            <p style={{ color: '#b2c4d9', fontSize: 12 }}>{owned.has(detail.id) ? 'В коллекции' : 'Не получена'}</p>
+          <div className="ios-card" style={{ width: 'min(92vw, 400px)', maxHeight: '85dvh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
+            <img src={detail.image} alt={detail.name} style={{ width: '100%', borderRadius: 12, display: 'block' }} />
+            <h2 style={{ margin: '16px 0 4px' }}>{detail.name}</h2>
+            <p style={{ color: rarityColor[detail.rarity], margin: 0 }}>{detail.rarity}</p>
+            <p className="muted">{owned.has(detail.id) ? 'В коллекции' : 'Не получена'}</p>
+            <button onClick={() => setDetail(null)} className="ios-btn secondary" style={{ marginTop: 12 }}>Закрыть</button>
           </div>
         </div>
       )}
     </div>
   );
 }
-
-const sel: React.CSSProperties = { font: 'inherit', background: '#142e4c', color: '#f4eedc', border: '2px solid #7b8ea3', padding: 10, cursor: 'pointer' };
-const btn: React.CSSProperties = { font: 'inherit', background: '#142e4c', color: '#f4eedc', border: '2px solid #7b8ea3', padding: 10, cursor: 'pointer' };
