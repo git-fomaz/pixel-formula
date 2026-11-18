@@ -57,7 +57,7 @@ export default function Home() {
       </div>
 
       <div className="section-title">Следующая гонка</div>
-      <div className="ios-card" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 12, alignItems: 'center' }}>
+      <div className="ios-card" style={{ display: 'grid', gridTemplateColumns: '1fr 160px', gap: 16, alignItems: 'center' }}>
         <div>
           <div style={{ fontSize: 20, fontWeight: 700 }}>{nextRace.name}</div>
           <div className="muted">{nextRace.circuit}</div>
@@ -74,10 +74,10 @@ export default function Home() {
           src="/vegas-banner.jpg"
           alt="Las Vegas Grand Prix"
           style={{
-            width: 140,
-            height: 100,
+            width: 160,
+            height: 160,
             objectFit: 'cover',
-            borderRadius: 12,
+            borderRadius: 16,
             imageRendering: 'pixelated',
             border: '1px solid var(--separator)',
           }}
