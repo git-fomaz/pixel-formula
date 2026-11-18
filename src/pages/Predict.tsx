@@ -64,7 +64,7 @@ export default function Predict() {
       <h2>Гран-при Лас-Вегаса</h2>
       <p className="muted">20–22 ноября 2026 · Las Vegas Strip Circuit</p>
 
-      <div className="ios-card" style={{ overflow: 'hidden', padding: 0 }}>
+      <div className="ios-card" style={{ overflow: 'hidden', padding: 0, border: '2px solid transparent', backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, var(--ferrari), var(--mercedes))', backgroundOrigin: 'border-box', backgroundClip: 'padding-box, border-box' }}>
         <img
           src="/predict-banner.jpg"
           alt="Kimi Antonelli with trophy, George Russell and Charles Leclerc"
