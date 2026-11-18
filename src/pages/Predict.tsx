@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 const DRIVERS = [
   'Lando Norris', 'Oscar Piastri', 'George Russell', 'Kimi Antonelli',
@@ -12,13 +12,24 @@ const DRIVERS = [
 const RACE = { id: 'las-vegas-2026', deadline: '2026-11-22T04:00:00Z' };
 const KEY = 'pf:prediction:' + RACE.id;
 
+function getTelegramUser() {
+  try {
+    const tg = (window as any).Telegram?.WebApp;
+    const u = tg?.initDataUnsafe?.user;
+    if (u?.id) return { id: String(u.id), name: u.first_name || u.username || `User ${u.id}` };
+  } catch {}
+  return { id: 'guest', name: 'Guest' };
+}
+
 export default function Predict() {
   const [picks, setPicks] = useState<string[]>(Array(5).fill(''));
   const [saved, setSaved] = useState<{ picks: string[]; savedAt: string } | null>(null);
   const [editing, setEditing] = useState(false);
   const [now, setNow] = useState(Date.now());
+  const user = useMemo(getTelegramUser, []);
 
   useEffect(() => {
+    // Load local first
     try {
       const raw = localStorage.getItem(KEY);
       if (raw) {
@@ -29,9 +40,23 @@ export default function Predict() {
         }
       }
     } catch {}
+
+    // Try to load from server
+    if (user.id !== 'guest') {
+      fetch(`/api/prediction?userId=${user.id}&raceId=${RACE.id}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data?.picks?.length === 5) {
+            setSaved({ picks: data.picks, savedAt: data.savedAt });
+            setPicks(data.picks);
+          }
+        })
+        .catch(() => {});
+    }
+
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [user.id]);
 
   const ms = Date.parse(RACE.deadline) - now;
   const closed = ms <= 0;
@@ -45,7 +70,7 @@ export default function Predict() {
     setPicks(next);
   };
 
-  const save = () => {
+  const save = async () => {
     if (picks.filter(Boolean).length !== 5 || new Set(picks).size !== 5) {
       alert('Выбери пять разных пилотов');
       return;
@@ -54,6 +79,17 @@ export default function Predict() {
     localStorage.setItem(KEY, JSON.stringify(next));
     setSaved(next);
     setEditing(false);
+
+    // Save to server
+    if (user.id !== 'guest') {
+      try {
+        await fetch('/api/prediction', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id, raceId: RACE.id, picks, name: user.name }),
+        });
+      } catch {}
+    }
   };
 
   const showEditor = !closed && (!saved || editing);
@@ -101,7 +137,7 @@ export default function Predict() {
             <label key={i} style={{ display: 'grid', gridTemplateColumns: '36px 1fr', alignItems: 'center', gap: 12, marginTop: 12 }}>
               <span style={{
                 background: 'var(--bg-secondary)',
-                color: 'var(--accent)',
+                color: 'var(--ferrari)',
                 width: 36,
                 height: 36,
                 borderRadius: 10,
