@@ -64,7 +64,7 @@ export default function Home() {
           <div style={{ marginTop: 8, color: 'var(--ferrari)' }}>{formatDate(nextRace.date)}</div>
           <div style={{ marginTop: 16 }}>
             <div className="muted" style={{ fontSize: 13 }}>До закрытия приёма</div>
-            <div style={{ fontSize: 28, fontWeight: 700, fontVariantNumeric: 'tabular-nums', letterSpacing: -0.5, marginTop: 4 }}>{clock}</div>
+            <div style={{ fontSize: 17, fontWeight: 600, fontVariantNumeric: 'tabular-nums', letterSpacing: -0.3, marginTop: 4 }}>{clock}</div>
           </div>
           <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>
             Всего этапов: {RACES.length}
