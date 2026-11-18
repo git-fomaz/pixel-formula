@@ -30,6 +30,10 @@ function storageKey(mode: Mode) {
   return mode === 'race' ? `pf:prediction:${RACE.id}` : `pf:prediction:${RACE.id}-q`;
 }
 
+function serverRaceId(mode: Mode) {
+  return mode === 'race' ? RACE.id : `${RACE.id}-q`;
+}
+
 function deadlineFor(mode: Mode) {
   return mode === 'race' ? RACE.deadline : RACE.qualifyingDeadline;
 }
