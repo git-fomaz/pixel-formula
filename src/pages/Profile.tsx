@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { PF_CARDS } from '../data/cards';
 
@@ -49,24 +49,55 @@ const rarityColor: Record<string, string> = {
 };
 
 export default function Profile() {
+  const [user, setUser] = useState<any>(null);
   const rewards = useMemo(loadSummary, []);
   const pts = useMemo(loadPoints, []);
+
+  useEffect(() => {
+    try {
+      const tg = (window as any).Telegram?.WebApp;
+      if (tg?.initDataUnsafe?.user) {
+        setUser(tg.initDataUnsafe.user);
+      } else {
+        setUser(null);
+      }
+    } catch {
+      setUser(null);
+    }
+  }, []);
+
+  const displayName = user ? (user.first_name || user.username || 'Игрок') : 'Игрок';
+  const photoUrl = user?.photo_url;
 
   return (
     <div className="pixel-page">
       <h2>Профиль</h2>
 
       <div className="ios-card" style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-        <div style={{
-          width: 64, height: 64, borderRadius: 32, background: 'var(--accent)',
-          display: 'grid', placeItems: 'center', fontSize: 24, fontWeight: 700, color: '#fff',
-        }}>PF</div>
+        {photoUrl ? (
+          <img
+            src={photoUrl}
+            alt={displayName}
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: 32,
+              objectFit: 'cover',
+              border: '2px solid var(--separator)',
+            }}
+          />
+        ) : (
+          <div style={{
+            width: 64, height: 64, borderRadius: 32, background: 'var(--ferrari)',
+            display: 'grid', placeItems: 'center', fontSize: 24, fontWeight: 700, color: '#fff',
+          }}>{displayName.charAt(0).toUpperCase()}</div>
+        )}
         <div>
-          <div style={{ fontWeight: 700, fontSize: 20 }}>Игрок</div>
-          <div className="muted">Telegram не подключён</div>
+          <div style={{ fontWeight: 700, fontSize: 20 }}>{displayName}</div>
+          <div className="muted">{user ? (user.username ? `@${user.username}` : 'Telegram') : 'Telegram не подключён'}</div>
           <span style={{
             display: 'inline-block', marginTop: 4, padding: '2px 8px',
-            background: 'rgba(10, 132, 255, 0.2)', color: 'var(--accent)',
+            background: 'rgba(192, 57, 43, 0.15)', color: 'var(--ferrari)',
             borderRadius: 999, fontSize: 12, fontWeight: 600,
           }}>BETA</span>
         </div>
@@ -91,7 +122,7 @@ export default function Profile() {
           ))}
         </div>
         <div style={{ height: 6, background: 'var(--fill)', borderRadius: 3, marginTop: 16, overflow: 'hidden' }}>
-          <div style={{ height: '100%', background: 'var(--accent)', width: `${(rewards.distinct / PF_CARDS.length) * 100}%`, borderRadius: 3 }} />
+          <div style={{ height: '100%', background: 'var(--ferrari)', width: `${(rewards.distinct / PF_CARDS.length) * 100}%`, borderRadius: 3 }} />
         </div>
       </div>
 
