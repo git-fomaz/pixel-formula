@@ -57,17 +57,31 @@ export default function Home() {
       </div>
 
       <div className="section-title">Следующая гонка</div>
-      <div className="ios-card">
-        <div style={{ fontSize: 20, fontWeight: 700 }}>{nextRace.name}</div>
-        <div className="muted">{nextRace.circuit}</div>
-        <div style={{ marginTop: 8, color: 'var(--accent)' }}>{formatDate(nextRace.date)}</div>
-        <div style={{ marginTop: 16 }}>
-          <div className="muted" style={{ fontSize: 13 }}>До закрытия приёма</div>
-          <div style={{ fontSize: 28, fontWeight: 700, fontVariantNumeric: 'tabular-nums', letterSpacing: -0.5, marginTop: 4 }}>{clock}</div>
+      <div className="ios-card" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 12, alignItems: 'center' }}>
+        <div>
+          <div style={{ fontSize: 20, fontWeight: 700 }}>{nextRace.name}</div>
+          <div className="muted">{nextRace.circuit}</div>
+          <div style={{ marginTop: 8, color: 'var(--ferrari)' }}>{formatDate(nextRace.date)}</div>
+          <div style={{ marginTop: 16 }}>
+            <div className="muted" style={{ fontSize: 13 }}>До закрытия приёма</div>
+            <div style={{ fontSize: 28, fontWeight: 700, fontVariantNumeric: 'tabular-nums', letterSpacing: -0.5, marginTop: 4 }}>{clock}</div>
+          </div>
+          <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>
+            Всего этапов: {RACES.length}
+          </div>
         </div>
-        <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>
-          Всего этапов: {RACES.length}
-        </div>
+        <img
+          src="/vegas-banner.jpg"
+          alt="Las Vegas Grand Prix"
+          style={{
+            width: 140,
+            height: 100,
+            objectFit: 'cover',
+            borderRadius: 12,
+            imageRendering: 'pixelated',
+            border: '1px solid var(--separator)',
+          }}
+        />
       </div>
 
       <div className="section-title">Быстрые действия</div>
