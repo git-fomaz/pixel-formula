@@ -136,6 +136,7 @@ export const DRIVER_AVATAR: Record<string, string> = {
   'Liam Lawson': '/cards/04_Liam_Lawson_Rare.jpg',
   'George Russell': '/cards/21_George_Russell_Basic.jpg',
   'Kimi Antonelli': '/cards/17_Kimi_Antonelli_Basic.jpg',
+  'Andrea Kimi Antonelli': '/cards/17_Kimi_Antonelli_Basic.jpg',
   'Lewis Hamilton': '/cards/18_Lewis_Hamilton_Basic.jpg',
   'Oscar Piastri': '/cards/20_Oscar_Piastri_Basic.jpg',
   'Carlos Sainz': '/cards/22_Carlos_Sainz_Basic.jpg',
