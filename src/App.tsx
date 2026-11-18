@@ -34,10 +34,6 @@ function App() {
   return (
     <BrowserRouter>
       <div className="app">
-        <header className="pixel-header" style={{ textAlign: 'center', padding: '12px 16px 4px' }}>
-          <img src="/logo.png" alt="Pixel Formula" style={{ height: 56, width: 'auto', maxWidth: '100%', imageRendering: 'pixelated' }} />
-        </header>
-
         <main>
           <Routes>
             <Route path="/" element={<Home />} />
