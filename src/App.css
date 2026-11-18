@@ -66,7 +66,7 @@ body {
 
 main {
   flex: 1;
-  padding: 0 16px 100px;
+  padding: 0 16px 120px;
 }
 
 .pixel-page {
@@ -125,19 +125,21 @@ main {
 /* Bottom tab bar */
 .tab-bar {
   position: fixed;
-  bottom: 0;
+  bottom: 12px;
   left: 50%;
   transform: translateX(-50%);
-  width: 100%;
-  max-width: 480px;
-  background: rgba(255, 255, 255, 0.72);
+  width: calc(100% - 24px);
+  max-width: 456px;
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-top: 0.5px solid var(--separator);
+  border: 1px solid rgba(192, 57, 43, 0.25);
+  border-radius: 28px;
   display: flex;
   justify-content: space-around;
-  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+  padding: 6px 4px;
   z-index: 100;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
 }
 
 .tab-bar a {
@@ -146,20 +148,22 @@ main {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  color: var(--label-secondary);
+  color: var(--mercedes);
   text-decoration: none;
   font-size: 10px;
   font-weight: 500;
-  padding: 4px 0;
-  transition: color 0.2s ease;
+  padding: 6px 2px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
 }
 
 .tab-bar a.active {
-  color: var(--ferrari);
+  color: #fff;
+  background: linear-gradient(135deg, var(--ferrari) 0%, var(--mercedes) 100%);
 }
 
 .tab-bar .icon {
-  font-size: 22px;
+  font-size: 20px;
   line-height: 1;
 }
 
