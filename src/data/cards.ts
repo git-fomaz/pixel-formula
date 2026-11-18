@@ -1,7 +1,7 @@
 export interface Card {
   id: string;
   name: string;
-  rarity: 'Basic' | 'Rare' | 'Unique' | 'Masterpiece';
+  rarity: 'Basic' | 'Rare' | 'Unique' | 'Masterpiece' | 'Legendary';
   image: string;
 }
 
@@ -30,4 +30,5 @@ export const PF_CARDS: Card[] = [
   { id: '22_Carlos_Sainz_Basic', name: 'Carlos Sainz', rarity: 'Basic', image: '/cards/22_Carlos_Sainz_Basic.jpg' },
   { id: '23_Lance_Stroll_Basic', name: 'Lance Stroll', rarity: 'Basic', image: '/cards/23_Lance_Stroll_Basic.jpg' },
   { id: '24_Nico_Hulkenberg_Basic', name: 'Nico Hulkenberg', rarity: 'Basic', image: '/cards/24_Nico_Hulkenberg_Basic.jpg' },
+  { id: '25_YOU_Legendary_Beta', name: 'YOU', rarity: 'Legendary', image: '/cards/25_YOU_Legendary_Beta.jpg' },
 ];
