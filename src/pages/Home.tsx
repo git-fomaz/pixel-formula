@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getNextRace, RACES } from '../data/f1Data';
+import { fetchLastResults, DRIVER_AVATAR, driverInitials, type LastRacePayload } from '../lib/race';
 
 const DEADLINE = '2026-11-22T04:00:00Z';
 
 export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [now, setNow] = useState(Date.now());
+  const [lastRace, setLastRace] = useState<LastRacePayload | null>(null);
   const nextRace = getNextRace();
 
   useEffect(() => {
@@ -18,6 +20,7 @@ export default function Home() {
       setUser({ first_name: 'Guest', id: 0 });
     }
     const id = setInterval(() => setNow(Date.now()), 1000);
+    fetchLastResults().then(setLastRace);
     return () => clearInterval(id);
   }, []);
 
@@ -72,6 +75,65 @@ export default function Home() {
         <Link to="/collection" className="ios-btn secondary" style={{ width: 'auto' }}>Коллекция</Link>
         <Link to="/leaderboard" className="ios-btn secondary" style={{ width: 'auto' }}>Таблица</Link>
       </div>
+
+      {lastRace && lastRace.results.length > 0 && (
+        <>
+          <div className="section-title">Результаты последней гонки</div>
+          <div className="ios-card">
+            <div style={{ fontWeight: 700, marginBottom: 4 }}>{lastRace.raceName}</div>
+            <div className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
+              {new Date(lastRace.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {lastRace.results.slice(0, 5).map((r) => {
+                const avatar = DRIVER_AVATAR[r.name];
+                return (
+                  <div key={r.position} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{
+                      width: 22,
+                      textAlign: 'center',
+                      fontWeight: 700,
+                      color: 'var(--accent)',
+                      fontSize: 14,
+                    }}>{r.position}</span>
+                    {avatar ? (
+                      <img
+                        src={avatar}
+                        alt={r.name}
+                        style={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: 6,
+                          imageRendering: 'pixelated',
+                          objectFit: 'cover',
+                          border: '1px solid var(--separator)',
+                        }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: 6,
+                        background: 'var(--bg-secondary)',
+                        display: 'grid',
+                        placeItems: 'center',
+                        fontSize: 11,
+                        fontWeight: 700,
+                        imageRendering: 'pixelated',
+                        border: '1px solid var(--separator)',
+                      }}>
+                        {driverInitials(r.name)}
+                      </div>
+                    )}
+                    <div style={{ flex: 1, fontWeight: 600, fontSize: 15 }}>{r.name}</div>
+                    <div className="muted" style={{ fontSize: 13 }}>{r.points} очк.</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

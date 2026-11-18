@@ -77,6 +77,7 @@ export async function fetchResultsForRound(round: string): Promise<LastRacePaylo
 }
 
 export async function fetchLastResults(): Promise<LastRacePayload | null> {
+  // 1. Try our API (Redis)
   try {
     const res = await fetch('/api/results');
     if (res.ok) {
@@ -98,6 +99,7 @@ export async function fetchLastResults(): Promise<LastRacePayload | null> {
     }
   } catch {}
 
+  // 2. Try Jolpica directly
   try {
     const res = await fetch('https://api.jolpi.ca/ergast/f1/2026/last/results.json', {
       headers: { 'User-Agent': 'PixelFormula/1.0' },
@@ -122,6 +124,7 @@ export async function fetchLastResults(): Promise<LastRacePayload | null> {
     }
   } catch {}
 
+  // 3. Fallback mock so the feature is visible on Home
   return MOCK_LAST_RACE;
 }
 
