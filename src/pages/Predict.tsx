@@ -10,7 +10,8 @@ const DRIVERS = [
 ];
 
 const RACE = { id: 'las-vegas-2026', deadline: '2026-11-22T04:00:00Z' };
-const KEY = 'pf:prediction:' + RACE.id;
+
+type Mode = 'race' | 'qualifying';
 
 function getTelegramUser() {
   try {
@@ -21,7 +22,16 @@ function getTelegramUser() {
   return { id: 'guest', name: 'Guest' };
 }
 
+function storageKey(mode: Mode) {
+  return mode === 'race' ? `pf:prediction:${RACE.id}` : `pf:prediction:${RACE.id}-q`;
+}
+
+function serverRaceId(mode: Mode) {
+  return mode === 'race' ? RACE.id : `${RACE.id}-q`;
+}
+
 export default function Predict() {
+  const [mode, setMode] = useState<Mode>('race');
   const [picks, setPicks] = useState<string[]>(Array(5).fill(''));
   const [saved, setSaved] = useState<{ picks: string[]; savedAt: string } | null>(null);
   const [editing, setEditing] = useState(false);
@@ -29,9 +39,17 @@ export default function Predict() {
   const user = useMemo(getTelegramUser, []);
 
   useEffect(() => {
-    // Load local first
+    const key = storageKey(mode);
+    const rid = serverRaceId(mode);
+
+    // Reset state
+    setPicks(Array(5).fill(''));
+    setSaved(null);
+    setEditing(false);
+
+    // Load local
     try {
-      const raw = localStorage.getItem(KEY);
+      const raw = localStorage.getItem(key);
       if (raw) {
         const v = JSON.parse(raw);
         if (v.picks?.length === 5 && new Date(v.savedAt).getTime() < Date.parse(RACE.deadline)) {
@@ -41,9 +59,9 @@ export default function Predict() {
       }
     } catch {}
 
-    // Try to load from server
+    // Load from server
     if (user.id !== 'guest') {
-      fetch(`/api/prediction?userId=${user.id}&raceId=${RACE.id}`)
+      fetch(`/api/prediction?userId=${user.id}&raceId=${rid}`)
         .then(r => r.ok ? r.json() : null)
         .then(data => {
           if (data?.picks?.length === 5) {
@@ -53,10 +71,12 @@ export default function Predict() {
         })
         .catch(() => {});
     }
+  }, [mode, user.id]);
 
+  useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
-  }, [user.id]);
+  }, []);
 
   const ms = Date.parse(RACE.deadline) - now;
   const closed = ms <= 0;
@@ -76,17 +96,21 @@ export default function Predict() {
       return;
     }
     const next = { picks: [...picks], savedAt: new Date().toISOString() };
-    localStorage.setItem(KEY, JSON.stringify(next));
+    localStorage.setItem(storageKey(mode), JSON.stringify(next));
     setSaved(next);
     setEditing(false);
 
-    // Save to server
     if (user.id !== 'guest') {
       try {
         await fetch('/api/prediction', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: user.id, raceId: RACE.id, picks, name: user.name }),
+          body: JSON.stringify({
+            userId: user.id,
+            raceId: serverRaceId(mode),
+            picks,
+            name: user.name,
+          }),
         });
       } catch {}
     }
@@ -108,9 +132,29 @@ export default function Predict() {
         />
       </div>
 
+      {/* Mode switcher */}
+      <div style={{ display: 'flex', gap: 8, margin: '12px 0' }}>
+        <button
+          onClick={() => setMode('race')}
+          className={mode === 'race' ? 'ios-btn' : 'ios-btn secondary'}
+          style={{ width: 'auto', flex: 1 }}
+        >
+          Гонка
+        </button>
+        <button
+          onClick={() => setMode('qualifying')}
+          className={mode === 'qualifying' ? 'ios-btn' : 'ios-btn secondary'}
+          style={{ width: 'auto', flex: 1 }}
+        >
+          Квалификация
+        </button>
+      </div>
+
       <div className="ios-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ fontWeight: 600 }}>Ближайший этап</div>
+          <div style={{ fontWeight: 600 }}>
+            {mode === 'race' ? 'Прогноз на гонку' : 'Прогноз на квалификацию'}
+          </div>
           <span style={{
             background: closed ? 'var(--fill)' : 'rgba(48, 209, 88, 0.2)',
             color: closed ? 'var(--label-secondary)' : 'var(--accent-green)',
@@ -120,6 +164,11 @@ export default function Predict() {
             fontWeight: 600,
           }}>{status}</span>
         </div>
+        <p className="muted" style={{ margin: '8px 0 0', fontSize: 13 }}>
+          {mode === 'race'
+            ? 'Очки считаются полностью.'
+            : 'Очки считаются как половина от гонки (×0.5).'}
+        </p>
         {!closed && (
           <>
             <div className="section-title" style={{ marginTop: 16 }}>До закрытия приёма</div>
@@ -131,7 +180,9 @@ export default function Predict() {
 
       {showEditor && (
         <div className="ios-card">
-          <div style={{ fontWeight: 600, marginBottom: 8 }}>Твой прогноз · Топ-5</div>
+          <div style={{ fontWeight: 600, marginBottom: 8 }}>
+            Твой прогноз · Топ-5 {mode === 'qualifying' ? '(квалификация)' : ''}
+          </div>
           <p className="muted" style={{ marginTop: 0 }}>Выбери пилотов в порядке финиша.</p>
           {picks.map((v, i) => (
             <label key={i} style={{ display: 'grid', gridTemplateColumns: '36px 1fr', alignItems: 'center', gap: 12, marginTop: 12 }}>
@@ -164,7 +215,9 @@ export default function Predict() {
         <div className="ios-card">
           <div style={{ background: 'rgba(48, 209, 88, 0.15)', borderRadius: 12, padding: 14, marginBottom: 16 }}>
             <div style={{ fontWeight: 700, color: 'var(--accent-green)' }}>Прогноз принят</div>
-            <p className="muted" style={{ margin: '4px 0 0' }}>Пятёрка сохранена. До дедлайна можно изменить.</p>
+            <p className="muted" style={{ margin: '4px 0 0' }}>
+              {mode === 'race' ? 'Пятёрка на гонку сохранена.' : 'Пятёрка на квалификацию сохранена.'} До дедлайна можно изменить.
+            </p>
             <p className="muted" style={{ margin: '8px 0 0', fontSize: 13 }}>
               Сохранено: {new Date(saved.savedAt).toLocaleString('ru-RU')}
             </p>
