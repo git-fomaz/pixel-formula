@@ -3,7 +3,7 @@ import { PF_CARDS } from '../data/cards';
 
 type Rarity = 'Basic' | 'Rare' | 'Unique' | 'Masterpiece' | 'all';
 
-function loadOwned(isDemo: boolean): Set<string> {
+function loadOwned(): Set<string> {
   try {
     const raw = localStorage.getItem('pf:rewards:v1');
     if (!raw) return new Set();
@@ -11,7 +11,7 @@ function loadOwned(isDemo: boolean): Set<string> {
     if (db.version !== 1 || !db.awards) return new Set();
     const ids = new Set<string>();
     for (const a of Object.values(db.awards) as any[]) {
-      if (a && a.demo === isDemo && a.cardId) ids.add(a.cardId);
+      if (a && a.demo === false && a.cardId) ids.add(a.cardId);
     }
     return ids;
   } catch {
@@ -27,16 +27,14 @@ const rarityColor: Record<string, string> = {
 };
 
 export default function Collection() {
-  const [view, setView] = useState<'catalog' | 'owned'>('owned');
-  const [mode, setMode] = useState<'live' | 'demo'>('live');
   const [rarity, setRarity] = useState<Rarity>('all');
   const [detail, setDetail] = useState<(typeof PF_CARDS)[0] | null>(null);
 
-  const owned = useMemo(() => loadOwned(mode === 'demo'), [mode]);
+  const owned = useMemo(() => loadOwned(), []);
 
   const filtered = PF_CARDS.filter(c => {
+    if (!owned.has(c.id)) return false;
     if (rarity !== 'all' && c.rarity !== rarity) return false;
-    if (view === 'owned' && !owned.has(c.id)) return false;
     return true;
   });
 
@@ -56,29 +54,19 @@ export default function Collection() {
       <p className="muted">Только полученные карточки</p>
 
       <div className="ios-card">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-          <select value={view} onChange={e => setView(e.target.value as any)}>
-            <option value="catalog">Весь каталог</option>
-            <option value="owned">Полученные</option>
-          </select>
-          <select value={mode} onChange={e => setMode(e.target.value as any)}>
-            <option value="live">Настоящие</option>
-            <option value="demo">Демо</option>
-          </select>
-          <select value={rarity} onChange={e => setRarity(e.target.value as Rarity)}>
-            <option value="all">Все</option>
-            <option>Basic</option>
-            <option>Rare</option>
-            <option>Unique</option>
-            <option>Masterpiece</option>
-          </select>
-        </div>
-        <p style={{ color: 'var(--accent)', marginTop: 12, marginBottom: 0, fontWeight: 600 }}>
-          Получено: {stats.distinct} / {PF_CARDS.length}
+        <select value={rarity} onChange={e => setRarity(e.target.value as Rarity)}>
+          <option value="all">Все редкости</option>
+          <option>Basic</option>
+          <option>Rare</option>
+          <option>Unique</option>
+          <option>Masterpiece</option>
+        </select>
+        <p style={{ color: 'var(--ferrari)', marginTop: 12, marginBottom: 0, fontWeight: 600 }}>
+          Получено: {stats.distinct}
         </p>
       </div>
 
-      {filtered.length === 0 && <p className="muted">Нет карточек по выбранным условиям.</p>}
+      {filtered.length === 0 && <p className="muted">Пока нет полученных карточек.</p>}
 
       <div className="card-grid">
         {filtered.map(card => (
@@ -87,7 +75,6 @@ export default function Collection() {
             <div className="meta">
               <div style={{ fontWeight: 600 }}>{card.name}</div>
               <div style={{ color: rarityColor[card.rarity], fontSize: 12 }}>{card.rarity}</div>
-              {owned.has(card.id) && <span style={{ color: 'var(--accent-green)', fontSize: 12 }}>✓ в коллекции</span>}
             </div>
           </button>
         ))}
@@ -102,7 +89,6 @@ export default function Collection() {
             <img src={detail.image} alt={detail.name} style={{ width: '100%', borderRadius: 12, display: 'block' }} />
             <h2 style={{ margin: '16px 0 4px' }}>{detail.name}</h2>
             <p style={{ color: rarityColor[detail.rarity], margin: 0 }}>{detail.rarity}</p>
-            <p className="muted">{owned.has(detail.id) ? 'В коллекции' : 'Не получена'}</p>
             <button onClick={() => setDetail(null)} className="ios-btn secondary" style={{ marginTop: 12 }}>Закрыть</button>
           </div>
         </div>
