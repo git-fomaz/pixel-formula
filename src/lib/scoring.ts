@@ -16,7 +16,7 @@ export interface ScoreResult {
 const POINTS = [15, 12, 10, 8, 8];
 const BONUS = [0, 0, 2, 5, 10, 20];
 
-export function calculateScore(picks: string[], actual: string[]): ScoreResult {
+export function calculateScore(picks: string[], actual: string[], multiplier = 1): ScoreResult {
   for (const arr of [picks, actual]) {
     if (!Array.isArray(arr) || arr.length !== 5 || new Set(arr).size !== 5 || arr.some(v => typeof v !== 'string' || !v.trim())) {
       throw new Error('Нужны пять разных пилотов');
@@ -28,15 +28,15 @@ export function calculateScore(picks: string[], actual: string[]): ScoreResult {
     driver,
     actual: actual[i],
     matched: driver === actual[i],
-    points: driver === actual[i] ? POINTS[i] : 0,
+    points: driver === actual[i] ? POINTS[i] * multiplier : 0,
   }));
 
   const exactHits = positions.filter(x => x.matched).length;
   const basePoints = positions.reduce((s, x) => s + x.points, 0);
-  const bonusPoints = BONUS[exactHits];
+  const bonusPoints = BONUS[exactHits] * multiplier;
 
   return {
-    rulesVersion: 'top5-v1',
+    rulesVersion: multiplier === 1 ? 'top5-v1' : 'top5-q-v1',
     positions,
     exactHits,
     basePoints,
