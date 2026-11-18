@@ -4,18 +4,20 @@ import { PF_CARDS } from '../data/cards';
 type Rarity = 'Basic' | 'Rare' | 'Unique' | 'Masterpiece' | 'all';
 
 function loadOwned(): Set<string> {
+  const ids = new Set<string>();
+  // Limited beta card — always owned for anyone who opens the app
+  ids.add('25_YOU_Legendary_Beta');
   try {
     const raw = localStorage.getItem('pf:rewards:v1');
-    if (!raw) return new Set();
+    if (!raw) return ids;
     const db = JSON.parse(raw);
-    if (db.version !== 1 || !db.awards) return new Set();
-    const ids = new Set<string>();
+    if (db.version !== 1 || !db.awards) return ids;
     for (const a of Object.values(db.awards) as any[]) {
       if (a && a.demo === false && a.cardId) ids.add(a.cardId);
     }
     return ids;
   } catch {
-    return new Set();
+    return ids;
   }
 }
 
@@ -24,6 +26,7 @@ const rarityColor: Record<string, string> = {
   Rare: '#ffd60a',
   Unique: '#bf5af2',
   Masterpiece: '#ff9f0a',
+  Legendary: '#ffd700',
 };
 
 export default function Collection() {
@@ -60,6 +63,7 @@ export default function Collection() {
           <option>Rare</option>
           <option>Unique</option>
           <option>Masterpiece</option>
+          <option>Legendary</option>
         </select>
         <p style={{ color: 'var(--ferrari)', marginTop: 12, marginBottom: 0, fontWeight: 600 }}>
           Получено: {stats.distinct}
