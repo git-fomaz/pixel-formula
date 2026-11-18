@@ -1,13 +1,5 @@
 import { useState, useMemo } from 'react';
 
-const MOCK = [
-  { name: 'PixelPilot', points: 142, exact: 3 },
-  { name: 'NitroNerd', points: 128, exact: 2 },
-  { name: 'GridGhost', points: 115, exact: 1 },
-  { name: 'TurboToast', points: 98, exact: 1 },
-  { name: 'ApexAnon', points: 87, exact: 0 },
-];
-
 function myPoints() {
   let total = 0;
   try {
@@ -28,7 +20,7 @@ export default function Leaderboard() {
   const me = useMemo(myPoints, []);
 
   const rows = useMemo(() => {
-    const all = [...MOCK, { name: 'Ты', points: me, exact: 0 }];
+    const all = [{ name: 'Ты', points: me, exact: 0 }];
     return all
       .filter(r => r.name.toLowerCase().includes(q.toLowerCase()))
       .sort((a, b) => b.points - a.points)
@@ -40,7 +32,7 @@ export default function Leaderboard() {
   return (
     <div className="pixel-page">
       <h2>Турнирная таблица</h2>
-      <p className="muted">Сравни свой результат с другими игроками</p>
+      <p className="muted">Реальные игроки</p>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         <button onClick={() => setTab('season')} className={tab === 'season' ? 'ios-btn' : 'ios-btn secondary'} style={{ width: 'auto', flex: 1 }}>Сезон</button>
@@ -48,7 +40,7 @@ export default function Leaderboard() {
       </div>
 
       <div className="stat-row" style={{ marginBottom: 16 }}>
-        <div className="stat-box"><strong>{MOCK.length + 1}</strong><small>Игроков</small></div>
+        <div className="stat-box"><strong>{rows.length}</strong><small>Игроков</small></div>
         <div className="stat-box"><strong>{me}</strong><small>Твои очки</small></div>
         <div className="stat-box"><strong>{myPos}</strong><small>Твоё место</small></div>
         <div className="stat-box"><strong>{tab === 'season' ? 'Сумма' : 'Этап'}</strong><small>Режим</small></div>
@@ -68,10 +60,10 @@ export default function Leaderboard() {
           </thead>
           <tbody>
             {rows.map(r => (
-              <tr key={r.name} style={r.name === 'Ты' ? { background: 'rgba(10, 132, 255, 0.12)' } : undefined}>
+              <tr key={r.name} style={r.name === 'Ты' ? { background: 'rgba(192, 57, 43, 0.12)' } : undefined}>
                 <td style={{ padding: '14px 16px', fontWeight: r.name === 'Ты' ? 700 : 400 }}>{r.pos}</td>
                 <td style={{ padding: '14px 16px', fontWeight: r.name === 'Ты' ? 700 : 400 }}>{r.name}</td>
-                <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 600, color: 'var(--accent)' }}>{r.points}</td>
+                <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 600, color: 'var(--ferrari)' }}>{r.points}</td>
                 <td style={{ padding: '14px 16px', textAlign: 'right', color: 'var(--label-secondary)' }}>{r.exact}</td>
               </tr>
             ))}
