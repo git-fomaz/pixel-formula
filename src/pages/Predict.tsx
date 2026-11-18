@@ -9,7 +9,11 @@ const DRIVERS = [
   'Valtteri Bottas', 'Sergio Perez'
 ];
 
-const RACE = { id: 'las-vegas-2026', deadline: '2026-11-22T04:00:00Z' };
+const RACE = {
+  id: 'las-vegas-2026',
+  deadline: '2026-11-22T04:00:00Z',          // старт гонки
+  qualifyingDeadline: '2026-11-21T20:00:00Z', // старт квалификации
+};
 
 type Mode = 'race' | 'qualifying';
 
@@ -26,8 +30,8 @@ function storageKey(mode: Mode) {
   return mode === 'race' ? `pf:prediction:${RACE.id}` : `pf:prediction:${RACE.id}-q`;
 }
 
-function serverRaceId(mode: Mode) {
-  return mode === 'race' ? RACE.id : `${RACE.id}-q`;
+function deadlineFor(mode: Mode) {
+  return mode === 'race' ? RACE.deadline : RACE.qualifyingDeadline;
 }
 
 export default function Predict() {
@@ -52,7 +56,7 @@ export default function Predict() {
       const raw = localStorage.getItem(key);
       if (raw) {
         const v = JSON.parse(raw);
-        if (v.picks?.length === 5 && new Date(v.savedAt).getTime() < Date.parse(RACE.deadline)) {
+        if (v.picks?.length === 5 && new Date(v.savedAt).getTime() < Date.parse(deadlineFor(mode))) {
           setSaved(v);
           setPicks(v.picks);
         }
@@ -78,7 +82,8 @@ export default function Predict() {
     return () => clearInterval(id);
   }, []);
 
-  const ms = Date.parse(RACE.deadline) - now;
+  const deadline = deadlineFor(mode);
+  const ms = Date.parse(deadline) - now;
   const closed = ms <= 0;
   const clock = ms > 0
     ? `${Math.floor(ms / 86400000)}д ${String(Math.floor(ms / 3600000) % 24).padStart(2, '0')}:${String(Math.floor(ms / 60000) % 60).padStart(2, '0')}:${String(Math.floor(ms / 1000) % 60).padStart(2, '0')}`
@@ -175,7 +180,7 @@ export default function Predict() {
             <div style={{ fontSize: 32, fontWeight: 700, fontVariantNumeric: 'tabular-nums', letterSpacing: -1 }}>{clock}</div>
           </>
         )}
-        <p className="muted" style={{ marginTop: 8, marginBottom: 0 }}>Дедлайн: 22 ноября, 07:00 МСК</p>
+        <p className="muted" style={{ marginTop: 8, marginBottom: 0 }}>Дедлайн: {mode === 'race' ? '22 ноября, 07:00 МСК' : '21 ноября, 23:00 МСК'}</p>
       </div>
 
       {showEditor && (
