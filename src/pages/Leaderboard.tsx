@@ -1,33 +1,35 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
-function myPoints() {
-  let total = 0;
+function getTelegramUser() {
   try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k?.startsWith('pf:race-result:v1:')) {
-        const v = JSON.parse(localStorage.getItem(k) || '{}');
-        if (typeof v.points === 'number') total += v.points;
-      }
-    }
+    const tg = (window as any).Telegram?.WebApp;
+    const u = tg?.initDataUnsafe?.user;
+    if (u?.id) return String(u.id);
   } catch {}
-  return total;
+  return 'guest';
 }
 
 export default function Leaderboard() {
   const [tab, setTab] = useState<'season' | 'race'>('season');
   const [q, setQ] = useState('');
-  const me = useMemo(myPoints, []);
+  const [players, setPlayers] = useState<{ userId: string; name: string; points: number; exact: number; pos: number }[]>([]);
+  const myId = useMemo(getTelegramUser, []);
+
+  useEffect(() => {
+    fetch('/api/leaderboard')
+      .then(r => r.ok ? r.json() : { players: [] })
+      .then(data => setPlayers(data.players || []))
+      .catch(() => setPlayers([]));
+  }, []);
 
   const rows = useMemo(() => {
-    const all = [{ name: 'Ты', points: me, exact: 0 }];
-    return all
+    return players
       .filter(r => r.name.toLowerCase().includes(q.toLowerCase()))
-      .sort((a, b) => b.points - a.points)
       .map((r, i) => ({ ...r, pos: i + 1 }));
-  }, [me, q]);
+  }, [players, q]);
 
-  const myPos = rows.find(r => r.name === 'Ты')?.pos ?? '—';
+  const me = players.find(p => p.userId === myId);
+  const myPos = me ? rows.find(r => r.userId === myId)?.pos ?? '—' : '—';
 
   return (
     <div className="pixel-page">
@@ -40,8 +42,8 @@ export default function Leaderboard() {
       </div>
 
       <div className="stat-row" style={{ marginBottom: 16 }}>
-        <div className="stat-box"><strong>{rows.length}</strong><small>Игроков</small></div>
-        <div className="stat-box"><strong>{me}</strong><small>Твои очки</small></div>
+        <div className="stat-box"><strong>{players.length}</strong><small>Игроков</small></div>
+        <div className="stat-box"><strong>{me?.points ?? 0}</strong><small>Твои очки</small></div>
         <div className="stat-box"><strong>{myPos}</strong><small>Твоё место</small></div>
         <div className="stat-box"><strong>{tab === 'season' ? 'Сумма' : 'Этап'}</strong><small>Режим</small></div>
       </div>
@@ -60,16 +62,16 @@ export default function Leaderboard() {
           </thead>
           <tbody>
             {rows.map(r => (
-              <tr key={r.name} style={r.name === 'Ты' ? { background: 'rgba(192, 57, 43, 0.12)' } : undefined}>
-                <td style={{ padding: '14px 16px', fontWeight: r.name === 'Ты' ? 700 : 400 }}>{r.pos}</td>
-                <td style={{ padding: '14px 16px', fontWeight: r.name === 'Ты' ? 700 : 400 }}>{r.name}</td>
+              <tr key={r.userId} style={r.userId === myId ? { background: 'rgba(192, 57, 43, 0.12)' } : undefined}>
+                <td style={{ padding: '14px 16px', fontWeight: r.userId === myId ? 700 : 400 }}>{r.pos}</td>
+                <td style={{ padding: '14px 16px', fontWeight: r.userId === myId ? 700 : 400 }}>{r.name}</td>
                 <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 600, color: 'var(--ferrari)' }}>{r.points}</td>
                 <td style={{ padding: '14px 16px', textAlign: 'right', color: 'var(--label-secondary)' }}>{r.exact}</td>
               </tr>
             ))}
           </tbody>
         </table>
-        {rows.length === 0 && <p className="muted" style={{ padding: 16, textAlign: 'center' }}>Никого не найдено</p>}
+        {rows.length === 0 && <p className="muted" style={{ padding: 16, textAlign: 'center' }}>Пока нет игроков</p>}
       </div>
     </div>
   );
