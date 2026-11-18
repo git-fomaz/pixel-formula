@@ -36,11 +36,11 @@ export default function Home() {
 
   return (
     <div className="pixel-page">
-      <div style={{ margin: '0 -16px 16px', borderRadius: 0 }}>
+      <div style={{ margin: '0 0 16px', borderRadius: 20, overflow: 'hidden', boxShadow: 'var(--shadow-soft)' }}>
         <img
           src="/header-banner.jpg"
-          alt="Pixel Formula — Champions Lineup"
-          style={{ width: '100%', display: 'block', imageRendering: 'pixelated', borderRadius: 0 }}
+          alt="2026 F1 Championship — Antonelli leading"
+          style={{ width: '100%', display: 'block', imageRendering: 'pixelated' }}
         />
       </div>
 
