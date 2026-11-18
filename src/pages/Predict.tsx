@@ -180,7 +180,7 @@ export default function Predict() {
             <div style={{ fontSize: 32, fontWeight: 700, fontVariantNumeric: 'tabular-nums', letterSpacing: -1 }}>{clock}</div>
           </>
         )}
-        <p className="muted" style={{ marginTop: 8, marginBottom: 0 }}>Дедлайн: {mode === 'race' ? '22 ноября, 07:00 МСК' : '21 ноября, 23:00 МСК'}</p>
+        <p className="muted" style={{ marginTop: 8, marginBottom: 0 }}>Дедлайн: {mode === 'race' ? '22 ноября, 07:00 МСК' : '21 ноября, 07:00 МСК'}</p>
       </div>
 
       {showEditor && (
