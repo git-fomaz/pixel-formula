@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { PF_CARDS } from '../data/cards';
+import { hasPrediction, fetchResultsForRound, CURRENT_RACE, formatCountdown, type LastRacePayload } from '../lib/race';
 
 type Rarity = 'Basic' | 'Rare' | 'Unique' | 'Masterpiece';
 
@@ -66,6 +67,27 @@ export default function Reward() {
   const [opened, setOpened] = useState<any>(null);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState('');
+  const [predicted, setPredicted] = useState(false);
+  const [results, setResults] = useState<LastRacePayload | null>(null);
+  const [loadingResults, setLoadingResults] = useState(true);
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    setPredicted(hasPrediction());
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    if (!predicted) {
+      setLoadingResults(false);
+      return;
+    }
+    setLoadingResults(true);
+    fetchResultsForRound(CURRENT_RACE.round)
+      .then(setResults)
+      .finally(() => setLoadingResults(false));
+  }, [predicted]);
 
   useEffect(() => {
     try {
@@ -109,6 +131,49 @@ export default function Reward() {
     return Object.values(db.awards).filter((a: any) => a && a.demo === true);
   }, [opened]);
 
+  const nextMs = Date.parse(CURRENT_RACE.start) - now;
+  const resultsReady = !!results?.results?.length;
+
+  // 1. No prediction → block
+  if (!predicted) {
+    return (
+      <div className="pixel-page">
+        <h2>Награда</h2>
+        <div className="ios-card" style={{ textAlign: 'center', padding: '32px 20px' }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>🏁</div>
+          <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 8 }}>Сначала сделай прогноз</div>
+          <p className="muted" style={{ margin: '0 0 20px' }}>
+            Страница награды открывается только после того, как ты сделаешь прогноз на ближайшую гонку.
+          </p>
+          <Link to="/predict" className="ios-btn">Сделать прогноз</Link>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. Prediction exists but results not ready yet
+  if (!loadingResults && !resultsReady) {
+    return (
+      <div className="pixel-page">
+        <h2>Награда</h2>
+        <div className="ios-card" style={{ textAlign: 'center', padding: '28px 20px' }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>⏳</div>
+          <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 8 }}>Ждем результаты гонки</div>
+          <p className="muted" style={{ margin: '0 0 16px' }}>
+            Прогноз принят. Как только результаты подтянутся — сможешь открыть награду.
+          </p>
+          <div className="muted" style={{ fontSize: 13 }}>До начала следующей гонки</div>
+          <div style={{ fontSize: 32, fontWeight: 700, fontVariantNumeric: 'tabular-nums', letterSpacing: -1, marginTop: 4 }}>
+            {formatCountdown(nextMs)}
+          </div>
+          <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>{CURRENT_RACE.name}</div>
+        </div>
+        <Link to="/predict" className="ios-btn secondary" style={{ marginTop: 16 }}>К прогнозу</Link>
+      </div>
+    );
+  }
+
+  // 3. Results ready → normal reward UI
   return (
     <div className="pixel-page">
       <h2>Награда</h2>
