@@ -49,27 +49,27 @@ function App() {
 
         <nav className="tab-bar">
           <NavLink to="/" end>
-            <span className="icon">🏠</span>
+            <img src="/icons/home.jpg" alt="" className="tab-icon" />
             Home
           </NavLink>
           <NavLink to="/predict">
-            <span className="icon">🏁</span>
+            <img src="/icons/predict.jpg" alt="" className="tab-icon" />
             Прогноз
           </NavLink>
           <NavLink to="/reward">
-            <span className="icon">🎁</span>
+            <img src="/icons/reward.jpg" alt="" className="tab-icon" />
             Награда
           </NavLink>
           <NavLink to="/collection">
-            <span className="icon">🃏</span>
+            <img src="/icons/cards.jpg" alt="" className="tab-icon" />
             Карты
           </NavLink>
           <NavLink to="/leaderboard">
-            <span className="icon">🏆</span>
+            <img src="/icons/leaderboard.jpg" alt="" className="tab-icon" />
             Таблица
           </NavLink>
           <NavLink to="/profile">
-            <span className="icon">👤</span>
+            <img src="/icons/profile.jpg" alt="" className="tab-icon" />
             Профиль
           </NavLink>
         </nav>
