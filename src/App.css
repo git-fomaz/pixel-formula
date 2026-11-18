@@ -1,27 +1,27 @@
-/* Pixel Formula — Modern iOS-style design */
+/* Pixel Formula — Light iOS-style design */
 
 :root {
-  --bg: #000000;
-  --bg-elevated: #1c1c1e;
-  --bg-secondary: #2c2c2e;
-  --bg-tertiary: #3a3a3c;
-  --separator: rgba(84, 84, 88, 0.65);
-  --label: #ffffff;
-  --label-secondary: rgba(235, 235, 245, 0.6);
-  --label-tertiary: rgba(235, 235, 245, 0.3);
-  --accent: #0a84ff;
-  --accent-red: #ff453a;
-  --accent-green: #30d158;
-  --accent-orange: #ff9f0a;
-  --accent-yellow: #ffd60a;
-  --fill: rgba(120, 120, 128, 0.2);
-  --fill-secondary: rgba(120, 120, 128, 0.16);
+  --bg: #f2f2f7;
+  --bg-elevated: #ffffff;
+  --bg-secondary: #e5e5ea;
+  --bg-tertiary: #d1d1d6;
+  --separator: rgba(60, 60, 67, 0.18);
+  --label: #000000;
+  --label-secondary: rgba(60, 60, 67, 0.6);
+  --label-tertiary: rgba(60, 60, 67, 0.3);
+  --accent: #007aff;
+  --accent-red: #ff3b30;
+  --accent-green: #34c759;
+  --accent-orange: #ff9500;
+  --accent-yellow: #ffcc00;
+  --fill: rgba(120, 120, 128, 0.12);
+  --fill-secondary: rgba(120, 120, 128, 0.08);
   --radius-sm: 10px;
   --radius-md: 14px;
   --radius-lg: 20px;
   --radius-xl: 28px;
-  --shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
-  --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.25);
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.06);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -50,54 +50,16 @@ body {
 }
 
 .pixel-header {
-  padding: 16px 20px 8px;
-  text-align: left;
+  padding: 12px 16px 4px;
+  text-align: center;
+  background: var(--bg);
 }
 
-.pixel-header h1 {
-  margin: 0;
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  color: var(--label);
-}
-
-.pixel-header p {
-  margin: 2px 0 0;
-  font-size: 15px;
-  color: var(--label-secondary);
-  font-weight: 400;
-}
-
-.pixel-nav {
-  display: flex;
-  gap: 6px;
-  padding: 8px 16px 12px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.pixel-nav::-webkit-scrollbar {
-  display: none;
-}
-
-.pixel-nav a {
-  flex: 0 0 auto;
-  color: var(--label-secondary);
-  text-decoration: none;
-  padding: 8px 16px;
-  border-radius: 999px;
-  background: var(--fill);
-  font-size: 15px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.pixel-nav a.active,
-.pixel-nav a:hover {
-  background: var(--accent);
-  color: #fff;
+.pixel-header img {
+  height: 48px;
+  width: auto;
+  max-width: 100%;
+  image-rendering: pixelated;
 }
 
 main {
@@ -116,8 +78,8 @@ main {
   letter-spacing: -0.3px;
 }
 
-.pixel-card,
-.ios-card {
+.ios-card,
+.pixel-card {
   background: var(--bg-elevated);
   border-radius: var(--radius-lg);
   padding: 16px;
@@ -126,8 +88,8 @@ main {
   border: 0.5px solid var(--separator);
 }
 
-.pixel-btn,
-.ios-btn {
+.ios-btn,
+.pixel-btn {
   background: var(--accent);
   color: #fff;
   border: none;
@@ -146,20 +108,16 @@ main {
   justify-content: center;
 }
 
-.pixel-btn:active,
-.ios-btn:active {
+.ios-btn:active,
+.pixel-btn:active {
   transform: scale(0.97);
   opacity: 0.85;
 }
 
-.pixel-btn.secondary,
-.ios-btn.secondary {
+.ios-btn.secondary,
+.pixel-btn.secondary {
   background: var(--fill);
   color: var(--accent);
-}
-
-.pixel-btn.primary {
-  background: var(--accent);
 }
 
 /* Bottom tab bar */
@@ -170,7 +128,7 @@ main {
   transform: translateX(-50%);
   width: 100%;
   max-width: 480px;
-  background: rgba(28, 28, 30, 0.82);
+  background: rgba(255, 255, 255, 0.86);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-top: 0.5px solid var(--separator);
@@ -219,11 +177,10 @@ input[type="text"] {
 
 select:focus,
 input:focus {
-  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.4);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3);
 }
 
 /* Tables */
-.pixel-table,
 table {
   width: 100%;
   border-collapse: separate;
@@ -231,7 +188,6 @@ table {
   font-size: 15px;
 }
 
-.pixel-table th,
 table th {
   text-align: left;
   color: var(--label-secondary);
@@ -242,15 +198,14 @@ table th {
   padding: 8px 12px;
 }
 
-.pixel-table td,
 table td {
   padding: 12px;
   border-bottom: 0.5px solid var(--separator);
 }
 
-.pixel-table .highlight,
-tr.me {
-  background: rgba(10, 132, 255, 0.15);
+tr.me,
+.highlight {
+  background: rgba(0, 122, 255, 0.08);
 }
 
 /* Cards grid */
@@ -294,6 +249,7 @@ tr.me {
   border-radius: var(--radius-md);
   padding: 16px;
   text-align: center;
+  border: 0.5px solid var(--separator);
 }
 
 .stat-box strong {
