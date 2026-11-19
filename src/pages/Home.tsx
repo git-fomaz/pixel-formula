@@ -84,12 +84,6 @@ export default function Home() {
         />
       </div>
 
-      <div className="section-title">Быстрые действия</div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-        <Link to="/collection" className="ios-btn secondary" style={{ width: 'auto' }}>Коллекция</Link>
-        <Link to="/leaderboard" className="ios-btn secondary" style={{ width: 'auto' }}>Таблица</Link>
-      </div>
-
       {lastRace && lastRace.results.length > 0 && (
         <>
           <div className="section-title">Результаты последней гонки</div>
