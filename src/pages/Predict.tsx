@@ -43,6 +43,7 @@ export default function Predict() {
   const [picks, setPicks] = useState<string[]>(Array(5).fill(''));
   const [saved, setSaved] = useState<{ picks: string[]; savedAt: string } | null>(null);
   const [editing, setEditing] = useState(false);
+  const [showRules, setShowRules] = useState(false);
   const [now, setNow] = useState(Date.now());
   const user = useMemo(getTelegramUser, []);
 
@@ -185,6 +186,13 @@ export default function Predict() {
           </>
         )}
         <p className="muted" style={{ marginTop: 8, marginBottom: 0 }}>Дедлайн: {mode === 'race' ? '22 ноября, 07:00 МСК' : '21 ноября, 07:00 МСК'}</p>
+        <button
+          onClick={() => setShowRules(true)}
+          className="ios-btn secondary"
+          style={{ marginTop: 12, width: 'auto', fontSize: 14 }}
+        >
+          Правила начисления очков
+        </button>
       </div>
 
       {showEditor && (
@@ -236,6 +244,64 @@ export default function Predict() {
           <ol style={{ paddingLeft: 20, margin: 0 }}>
             {saved.picks.map((p, i) => <li key={i} style={{ marginBottom: 6 }}>{p}</li>)}
           </ol>
+        </div>
+      )}
+
+      {showRules && (
+        <div
+          onClick={() => setShowRules(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.45)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 20,
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            className="ios-card"
+            style={{ maxWidth: 420, width: '100%', maxHeight: '80vh', overflow: 'auto' }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <div style={{ fontWeight: 700, fontSize: 18 }}>Правила начисления очков</div>
+              <button onClick={() => setShowRules(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
+            </div>
+
+            <div style={{ fontWeight: 600, marginBottom: 6 }}>Гонка (×1)</div>
+            <p className="muted" style={{ margin: '0 0 8px', fontSize: 14 }}>
+              Прогноз — топ-5 в порядке финиша. Очки за точное попадание места:
+            </p>
+            <ul style={{ margin: '0 0 12px', paddingLeft: 18, fontSize: 14 }}>
+              <li>1 место — 15 очков</li>
+              <li>2 место — 12 очков</li>
+              <li>3 место — 10 очков</li>
+              <li>4 место — 8 очков</li>
+              <li>5 место — 8 очков</li>
+            </ul>
+            <p className="muted" style={{ margin: '0 0 4px', fontSize: 14 }}>Бонус за количество точных попаданий:</p>
+            <ul style={{ margin: '0 0 16px', paddingLeft: 18, fontSize: 14 }}>
+              <li>2 точных — +2</li>
+              <li>3 точных — +5</li>
+              <li>4 точных — +10</li>
+              <li>5 точных — +20</li>
+            </ul>
+
+            <div style={{ fontWeight: 600, marginBottom: 6 }}>Квалификация (×0.5)</div>
+            <p className="muted" style={{ margin: '0 0 12px', fontSize: 14 }}>
+              Та же схема, но все очки (за места и бонус) умножаются на 0.5.
+            </p>
+
+            <div style={{ fontWeight: 600, marginBottom: 6 }}>Примеры</div>
+            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 14 }}>
+              <li>1-е и 3-е в гонке → 15 + 10 + бонус 2 = 27</li>
+              <li>Весь топ-5 в гонке → 73 очка</li>
+              <li>1-е и 2-е в квалификации → 14.5</li>
+            </ul>
+          </div>
         </div>
       )}
     </div>
