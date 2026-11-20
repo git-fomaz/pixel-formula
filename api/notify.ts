@@ -7,9 +7,13 @@ const NEXT_QUALIFYING = '2026-11-21T04:00:00Z'; // Las Vegas 21 Nov 07:00 MSK
 const RACE_NAME = 'Гран-при Лас-Вегаса';
 
 export default async function handler(req: any, res: any) {
-  // Optional protection
+  // Allow Vercel Cron
+  const isCron =
+    req.headers['user-agent']?.includes('vercel-cron') ||
+    !!req.headers['x-vercel-cron-schedule'];
+
   const secret = process.env.NOTIFY_SECRET;
-  if (secret && req.headers['x-notify-secret'] !== secret && req.body?.secret !== secret) {
+  if (!isCron && secret && req.headers['x-notify-secret'] !== secret && req.body?.secret !== secret) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
