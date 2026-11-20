@@ -50,6 +50,9 @@ const rarityColor: Record<string, string> = {
 
 export default function Profile() {
   const [user, setUser] = useState<any>(null);
+  const [nickname, setNickname] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const rewards = useMemo(loadSummary, []);
   const pts = useMemo(loadPoints, []);
 
@@ -58,6 +61,8 @@ export default function Profile() {
       const tg = (window as any).Telegram?.WebApp;
       if (tg?.initDataUnsafe?.user) {
         setUser(tg.initDataUnsafe.user);
+        const u = tg.initDataUnsafe.user;
+        setNickname(u.first_name || u.username || '');
       } else {
         setUser(null);
       }
@@ -68,6 +73,21 @@ export default function Profile() {
 
   const displayName = user ? (user.first_name || user.username || 'Игрок') : 'Игрок';
   const photoUrl = user?.photo_url;
+
+  const saveNickname = async () => {
+    if (!user?.id || !nickname.trim()) return;
+    setSaving(true);
+    setSaved(false);
+    try {
+      const res = await fetch('/api/nickname', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: String(user.id), name: nickname.trim() }),
+      });
+      if (res.ok) setSaved(true);
+    } catch {}
+    setSaving(false);
+  };
 
   return (
     <div className="pixel-page">
@@ -102,6 +122,41 @@ export default function Profile() {
           }}>BETA</span>
         </div>
       </div>
+
+      {user && (
+        <div className="ios-card" style={{ marginTop: 12 }}>
+          <div style={{ fontWeight: 600, marginBottom: 8 }}>Никнейм в таблице</div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              maxLength={24}
+              placeholder="Как тебя показывать"
+              style={{
+                flex: 1,
+                padding: '10px 12px',
+                borderRadius: 12,
+                border: '1px solid var(--separator)',
+                fontSize: 16,
+                outline: 'none',
+              }}
+            />
+            <button
+              onClick={saveNickname}
+              disabled={saving || !nickname.trim()}
+              className="ios-btn"
+              style={{ width: 'auto', padding: '0 16px' }}
+            >
+              {saving ? '...' : 'Сохранить'}
+            </button>
+          </div>
+          {saved && (
+            <div style={{ marginTop: 8, color: 'var(--ferrari)', fontSize: 13 }}>
+              Никнейм обновлён
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="section-title">Статистика</div>
       <div className="stat-row">
