@@ -108,9 +108,14 @@ async function scoreAllForRace(redis: any, raceId: string, actual: string[]) {
 }
 
 export default async function handler(req: any, res: any) {
-  // Optional: protect with a secret header for cron / manual calls
+  // Allow Vercel Cron (user-agent or x-vercel-cron-schedule header)
+  // Also allow manual calls with SYNC_SECRET if set
+  const isCron =
+    req.headers['user-agent']?.includes('vercel-cron') ||
+    !!req.headers['x-vercel-cron-schedule'];
+
   const secret = process.env.SYNC_SECRET;
-  if (secret && req.headers['x-sync-secret'] !== secret) {
+  if (!isCron && secret && req.headers['x-sync-secret'] !== secret) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
