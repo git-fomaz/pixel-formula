@@ -5,7 +5,7 @@ const DRIVERS = [
   'Max Verstappen', 'Isack Hadjar', 'Charles Leclerc', 'Lewis Hamilton',
   'Alex Albon', 'Carlos Sainz', 'Liam Lawson', 'Arvid Lindblad',
   'Fernando Alonso', 'Lance Stroll', 'Pierre Gasly', 'Franco Colapinto',
-  'Esteban Ocon', 'Oliver Bearman', 'Nico Hulkenberg', 'Gabriel Bortoleto',
+  'Rafael Camara', 'Oliver Bearman', 'Nico Hulkenberg', 'Gabriel Bortoleto',
   'Valtteri Bottas', 'Sergio Perez'
 ];
 
