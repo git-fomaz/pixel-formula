@@ -6,15 +6,16 @@ export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
-  const adminId = process.env.TELEGRAM_ADMIN_ID; // твой Telegram user id
+  const adminId = process.env.TELEGRAM_ADMIN_ID;
   if (!botToken) return res.status(500).json({ error: 'no bot token' });
+  if (!adminId) return res.status(500).json({ error: 'TELEGRAM_ADMIN_ID not set' });
 
   const update = req.body;
   const msg = update?.message;
   if (!msg || !msg.from) return res.status(200).json({ ok: true });
 
   // Только сообщения от админа
-  if (adminId && String(msg.from.id) !== String(adminId)) {
+  if (String(msg.from.id) !== String(adminId)) {
     return res.status(200).json({ ok: true, ignored: true });
   }
 
