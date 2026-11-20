@@ -93,6 +93,11 @@ export default function Collection() {
             <img src={detail.image} alt={detail.name} style={{ width: '100%', borderRadius: 12, display: 'block' }} />
             <h2 style={{ margin: '16px 0 4px' }}>{detail.name}</h2>
             <p style={{ color: rarityColor[detail.rarity], margin: 0 }}>{detail.rarity}</p>
+            {detail.id === '25_YOU_Legendary_Beta' && (
+              <p style={{ marginTop: 12, fontSize: 15, lineHeight: 1.4 }}>
+                Лимитированная карта бета-тестеров приложения
+              </p>
+            )}
             <button onClick={() => setDetail(null)} className="ios-btn secondary" style={{ marginTop: 12 }}>Закрыть</button>
           </div>
         </div>
