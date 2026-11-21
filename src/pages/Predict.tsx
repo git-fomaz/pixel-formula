@@ -73,7 +73,7 @@ export default function Predict() {
       fetch(`/api/prediction?userId=${user.id}&raceId=${rid}`)
         .then(r => r.ok ? r.json() : null)
         .then(data => {
-          if (data?.picks?.length === 5) {
+          if (data?.picks?.length === 5 && data.picks.every((p: string) => DRIVERS.includes(p))) {
             setSaved({ picks: data.picks, savedAt: data.savedAt });
             setPicks(data.picks);
           }
@@ -242,7 +242,11 @@ export default function Predict() {
           </div>
           <div className="section-title">Твой прогноз</div>
           <ol style={{ paddingLeft: 20, margin: 0 }}>
-            {saved.picks.map((p, i) => <li key={i} style={{ marginBottom: 6 }}>{p}</li>)}
+            {saved.picks.map((p, i) => (
+              <li key={i} style={{ marginBottom: 6 }}>
+                {DRIVERS.includes(p) ? p : '—'}
+              </li>
+            ))}
           </ol>
         </div>
       )}
