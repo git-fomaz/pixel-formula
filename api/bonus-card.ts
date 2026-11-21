@@ -2,7 +2,6 @@ import { createClient } from 'redis';
 
 const SEASON = '2026';
 
-// Basic cards only for the bonus (exclude Legendary YOU)
 const BASIC_CARDS = [
   '02_Charles_Leclerc_Basic',
   '05_Lando_Norris_Basic',
@@ -31,12 +30,15 @@ function pickRandom(arr: string[]) {
 }
 
 export default async function handler(req: any, res: any) {
+  if (req.method !== 'POST' && req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
   const redis = createClient({ url: process.env.REDIS_URL });
   try {
     await redis.connect();
 
     if (req.method === 'POST') {
-      // Award a random basic card to every user who doesn't have one yet
       const userIds = await redis.sMembers(`pf:${SEASON}:users`);
       let awarded = 0;
 
@@ -46,36 +48,31 @@ export default async function handler(req: any, res: any) {
         if (existing) continue;
 
         const cardId = pickRandom(BASIC_CARDS);
-        await redis.set(key, JSON.stringify({
-          cardId,
-          reason: 'За первый успешный прогноз на квалификацию',
-          awardedAt: new Date().toISOString(),
-        }));
+        await redis.set(
+          key,
+          JSON.stringify({
+            cardId,
+            reason: 'За первый успешный прогноз на квалификацию',
+            awardedAt: new Date().toISOString(),
+          })
+        );
         awarded++;
       }
 
-      await redis.quit();
       return res.status(200).json({ ok: true, awarded, totalUsers: userIds.length });
     }
 
-    if (req.method === 'GET') {
-      const { userId } = req.query || {};
-      if (!userId) return res.status(400).json({ error: 'userId required' });
+    const { userId } = req.query || {};
+    if (!userId) return res.status(400).json({ error: 'userId required' });
 
-      const key = `pf:${SEASON}:bonus-card:${userId}`;
-      const raw = await redis.get(key);
-      await redis.quit();
-
-      if (!raw) return res.status(404).json({ error: 'No bonus card' });
-      return res.status(200).json(JSON.parse(raw));
-    }
-
-    return res.status(405).end();
+    const key = `pf:${SEASON}:bonus-card:${userId}`;
+    const raw = await redis.get(key);
+    if (!raw) return res.status(404).json({ error: 'No bonus card' });
+    return res.status(200).json(JSON.parse(raw));
   } catch (err: any) {
     console.error(err);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message || 'Failed' });
   } finally {
     await redis.quit().catch(() => {});
   }
 }
-
