@@ -53,7 +53,7 @@ export default async function handler(req: any, res: any) {
           key,
           JSON.stringify({
             cardId,
-            reason: 'За первый успешный прогноз на квалификацию',
+            reason: 'За первый прогноз',
             awardedAt: new Date().toISOString(),
           })
         );
