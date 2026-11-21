@@ -119,7 +119,7 @@ export default function Collection() {
             )}
             {bonusCardId && detail.id === bonusCardId && (
               <p style={{ marginTop: 12, fontSize: 15, lineHeight: 1.4 }}>
-                За первый успешный прогноз на квалификацию
+                За первый прогноз
               </p>
             )}
             <button onClick={() => setDetail(null)} className="ios-btn secondary" style={{ marginTop: 12 }}>Закрыть</button>
