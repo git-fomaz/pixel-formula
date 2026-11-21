@@ -4,7 +4,7 @@ const SEASON = '2026';
 const RACE_ID = 'las-vegas-2026-q';
 
 const RESULTS = [
-  'Andrea Kimi Antonelli',
+  'Kimi Antonelli',
   'Max Verstappen',
   'George Russell',
   'Lando Norris',
@@ -48,7 +48,8 @@ export default async function handler(req: any, res: any) {
 
     for (const userId of userIds) {
       const alreadyKey = `pf:${SEASON}:result:${userId}:${RACE_ID}`;
-      if (await redis.get(alreadyKey)) continue;
+      // Force re-score for this run
+      // if (await redis.get(alreadyKey)) continue;
 
       const predRaw = await redis.get(`pf:${SEASON}:pred:${userId}:${RACE_ID}`);
       if (!predRaw) continue;
