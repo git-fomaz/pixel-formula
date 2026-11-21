@@ -12,7 +12,7 @@ const DRIVERS = [
 const RACE = {
   id: 'las-vegas-2026',
   deadline: '2026-11-22T04:00:00Z',          // старт гонки
-  qualifyingDeadline: '2026-11-21T20:00:00Z', // старт квалификации
+  qualifyingDeadline: '2026-11-21T03:00:00Z', // квалификация уже началась
 };
 
 type Mode = 'race' | 'qualifying';
@@ -185,7 +185,7 @@ export default function Predict() {
             <div style={{ fontSize: 32, fontWeight: 700, fontVariantNumeric: 'tabular-nums', letterSpacing: -1 }}>{clock}</div>
           </>
         )}
-        <p className="muted" style={{ marginTop: 8, marginBottom: 0 }}>Дедлайн: {mode === 'race' ? '22 ноября, 07:00 МСК' : '21 ноября, 07:00 МСК'}</p>
+        <p className="muted" style={{ marginTop: 8, marginBottom: 0 }}>Дедлайн: {mode === 'race' ? '22 ноября, 07:00 МСК' : 'Квалификация закрыта'}</p>
         <button
           onClick={() => setShowRules(true)}
           className="ios-btn secondary"
