@@ -45,7 +45,7 @@ export default function Collection() {
       const tg = (window as any).Telegram?.WebApp;
       const userId = tg?.initDataUnsafe?.user?.id;
       if (!userId) return;
-      fetch(`/api/bonus-card?userId=${userId}`)
+      fetch(`/api/award?userId=${userId}`)
         .then(r => r.ok ? r.json() : null)
         .then(data => {
           if (data?.cardId) setBonusCardId(data.cardId);
