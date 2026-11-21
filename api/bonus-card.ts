@@ -2,6 +2,7 @@ import { createClient } from 'redis';
 
 const SEASON = '2026';
 
+// Basic cards only for the bonus (exclude Legendary YOU)
 const BASIC_CARDS = [
   '02_Charles_Leclerc_Basic',
   '05_Lando_Norris_Basic',
@@ -39,6 +40,7 @@ export default async function handler(req: any, res: any) {
     await redis.connect();
 
     if (req.method === 'POST') {
+      // Award a random basic card to every user who doesn't have one yet
       const userIds = await redis.sMembers(`pf:${SEASON}:users`);
       let awarded = 0;
 
@@ -62,6 +64,7 @@ export default async function handler(req: any, res: any) {
       return res.status(200).json({ ok: true, awarded, totalUsers: userIds.length });
     }
 
+    // GET — fetch bonus card for one user
     const { userId } = req.query || {};
     if (!userId) return res.status(400).json({ error: 'userId required' });
 
