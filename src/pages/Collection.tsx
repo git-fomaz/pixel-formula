@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { PF_CARDS } from '../data/cards';
 
 type Rarity = 'Basic' | 'Rare' | 'Unique' | 'Masterpiece' | 'all';
@@ -32,8 +32,27 @@ const rarityColor: Record<string, string> = {
 export default function Collection() {
   const [rarity, setRarity] = useState<Rarity>('all');
   const [detail, setDetail] = useState<(typeof PF_CARDS)[0] | null>(null);
+  const [bonusCardId, setBonusCardId] = useState<string | null>(null);
 
-  const owned = useMemo(() => loadOwned(), []);
+  const owned = useMemo(() => {
+    const ids = loadOwned();
+    if (bonusCardId) ids.add(bonusCardId);
+    return ids;
+  }, [bonusCardId]);
+
+  useEffect(() => {
+    try {
+      const tg = (window as any).Telegram?.WebApp;
+      const userId = tg?.initDataUnsafe?.user?.id;
+      if (!userId) return;
+      fetch(`/api/bonus-card?userId=${userId}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data?.cardId) setBonusCardId(data.cardId);
+        })
+        .catch(() => {});
+    } catch {}
+  }, []);
 
   const filtered = PF_CARDS.filter(c => {
     if (!owned.has(c.id)) return false;
@@ -96,6 +115,11 @@ export default function Collection() {
             {detail.id === '25_YOU_Legendary_Beta' && (
               <p style={{ marginTop: 12, fontSize: 15, lineHeight: 1.4 }}>
                 Лимитированная карта бета-тестеров приложения
+              </p>
+            )}
+            {bonusCardId && detail.id === bonusCardId && (
+              <p style={{ marginTop: 12, fontSize: 15, lineHeight: 1.4 }}>
+                За первый успешный прогноз на квалификацию
               </p>
             )}
             <button onClick={() => setDetail(null)} className="ios-btn secondary" style={{ marginTop: 12 }}>Закрыть</button>
