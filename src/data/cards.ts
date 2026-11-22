@@ -3,6 +3,7 @@ export interface Card {
   name: string;
   rarity: 'Basic' | 'Rare' | 'Unique' | 'Masterpiece' | 'Legendary';
   image: string;
+  edition?: string;
 }
 
 export const PF_CARDS: Card[] = [
@@ -31,4 +32,11 @@ export const PF_CARDS: Card[] = [
   { id: '23_Lance_Stroll_Basic', name: 'Lance Stroll', rarity: 'Basic', image: '/cards/23_Lance_Stroll_Basic.jpg' },
   { id: '24_Nico_Hulkenberg_Basic', name: 'Nico Hulkenberg', rarity: 'Basic', image: '/cards/24_Nico_Hulkenberg_Basic.jpg' },
   { id: '25_YOU_Legendary_Beta', name: 'YOU', rarity: 'Legendary', image: '/cards/25_YOU_Legendary_Beta.jpg' },
+  { id: '26_Max_Verstappen_Unique_Las_Vegas_Winner', name: 'Max Verstappen — Las Vegas Winner', rarity: 'Unique', image: '/cards/26_Max_Verstappen_Unique_Las_Vegas_Winner.webp', edition: 'Las Vegas 2026' },
+  { id: '27_Lando_Norris_Rare_USA', name: 'Lando Norris', rarity: 'Rare', image: '/cards/27_Lando_Norris_Rare_USA.webp', edition: 'Las Vegas 2026' },
+  { id: '28_Oscar_Piastri_Rare_USA', name: 'Oscar Piastri', rarity: 'Rare', image: '/cards/28_Oscar_Piastri_Rare_USA.webp', edition: 'Las Vegas 2026' },
+  { id: '29_Kimi_Antonelli_Rare_USA', name: 'Kimi Antonelli', rarity: 'Rare', image: '/cards/29_Kimi_Antonelli_Rare_USA.webp', edition: 'Las Vegas 2026' },
+  { id: '30_Pierre_Gasly_Rare_USA', name: 'Pierre Gasly', rarity: 'Rare', image: '/cards/30_Pierre_Gasly_Rare_USA.webp', edition: 'Las Vegas 2026' },
 ];
+
+export const LAS_VEGAS_2026_CARDS = PF_CARDS.filter((card) => card.edition === 'Las Vegas 2026');
