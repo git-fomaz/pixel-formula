@@ -48,7 +48,7 @@ export default function Home() {
     <div className="pixel-page">
       <section className="championship-banner" aria-label="Топ-5 чемпионата Формулы-1 2026 после Гран-при Лас-Вегаса">
         <div className="championship-banner__art">
-          <img src="/header-banner.jpg" alt="Пиксель-арт болида Mercedes" />
+          <img src="/header-verstappen-vegas.webp" alt="Пиксель-арт Red Bull Макса Ферстаппена с флагом США" />
         </div>
         <div className="championship-banner__heading">
           <span className="championship-banner__flag" aria-hidden="true" />
