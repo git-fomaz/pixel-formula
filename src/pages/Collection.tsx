@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { PF_CARDS } from '../data/cards';
+import { PF_CARDS, LAS_VEGAS_2026_CARDS } from '../data/cards';
 
 type Rarity = 'Basic' | 'Rare' | 'Unique' | 'Masterpiece' | 'all';
 
@@ -64,6 +64,8 @@ export default function Collection() {
     return true;
   });
 
+  const vegasSeries = LAS_VEGAS_2026_CARDS.filter(c => rarity === 'all' || c.rarity === rarity);
+
   const stats = useMemo(() => {
     const known = [...owned].filter(id => PF_CARDS.some(c => c.id === id));
     const counts: Record<string, number> = { Basic: 0, Rare: 0, Unique: 0, Masterpiece: 0 };
@@ -106,6 +108,29 @@ export default function Collection() {
           </button>
         ))}
       </div>
+
+      {vegasSeries.length > 0 && (
+        <section aria-label="Новая серия карточек Лас-Вегас 2026">
+          <div className="section-title">Новая серия · Лас-Вегас 2026</div>
+          <p className="muted" style={{ marginTop: 0 }}>
+            Эти карточки могут выпасть в награде. Пока не полученные отмечены замком.
+          </p>
+          <div className="card-grid">
+            {vegasSeries.map(card => (
+              <button key={card.id} onClick={() => setDetail(card)} className="card-item" style={{ borderColor: rarityColor[card.rarity], cursor: 'pointer', textAlign: 'left', color: 'inherit', padding: 0 }}>
+                <img src={card.image} alt={card.name} loading="lazy" />
+                <div className="meta">
+                  <div style={{ fontWeight: 600 }}>{card.name}</div>
+                  <div style={{ color: rarityColor[card.rarity], fontSize: 12 }}>{card.rarity}</div>
+                  <div className="muted" style={{ marginTop: 4, fontSize: 12 }}>
+                    {owned.has(card.id) ? '✓ Получено' : '🔒 Не получено'}
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       {detail && (
         <div style={{
