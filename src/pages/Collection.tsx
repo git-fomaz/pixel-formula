@@ -13,7 +13,7 @@ function loadOwned(): Set<string> {
     const db = JSON.parse(raw);
     if (db.version !== 1 || !db.awards) return ids;
     for (const a of Object.values(db.awards) as any[]) {
-      if (a && a.demo === false && a.cardId) ids.add(a.cardId);
+      if (a && a.cardId && a.demo !== true) ids.add(a.cardId);
     }
     return ids;
   } catch {
@@ -45,7 +45,7 @@ export default function Collection() {
       const tg = (window as any).Telegram?.WebApp;
       const userId = tg?.initDataUnsafe?.user?.id;
       if (!userId) return;
-      fetch(`/api/award?userId=${userId}`)
+      fetch(`/api/bonus-card?userId=${userId}`)
         .then(r => r.ok ? r.json() : null)
         .then(data => {
           if (data?.cardId) setBonusCardId(data.cardId);
@@ -119,7 +119,7 @@ export default function Collection() {
             )}
             {bonusCardId && detail.id === bonusCardId && (
               <p style={{ marginTop: 12, fontSize: 15, lineHeight: 1.4 }}>
-                За первый прогноз
+                За первый успешный прогноз на квалификацию
               </p>
             )}
             <button onClick={() => setDetail(null)} className="ios-btn secondary" style={{ marginTop: 12 }}>Закрыть</button>
