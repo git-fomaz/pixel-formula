@@ -1,13 +1,49 @@
 import { createClient } from 'redis';
-import {
-  getAvailablePredictionRace,
-  isPredictionOpen,
-  predictionRaceId,
-  PREDICTION_DRIVERS,
-  type PredictionMode,
-} from '../src/lib/predictionSchedule';
 
 const SEASON = '2026';
+type PredictionMode = 'race' | 'qualifying';
+
+// Vercel runs this endpoint as a standalone Node function. Keep its schedule
+// self-contained (in sync with src/lib/predictionSchedule.ts) so the runtime
+// does not need to resolve a TypeScript module outside api/.
+const PREDICTION_RACES = [
+  {
+    id: 'qatar-2026', name: 'Гран-при Катара', circuit: 'Lusail International Circuit',
+    weekend: '27–29 ноября 2026', round: 22, unlockAfterRound: 21,
+    qualifyingDeadline: '2026-11-28T18:00:00Z', raceDeadline: '2026-11-29T16:00:00Z',
+    banner: '/qatar-banner.webp',
+  },
+  {
+    id: 'abu-dhabi-2026', name: 'Гран-при Абу-Даби', circuit: 'Yas Marina Circuit',
+    weekend: '4–6 декабря 2026', round: 23, unlockAfterRound: 22,
+    qualifyingDeadline: '2026-12-05T14:00:00Z', raceDeadline: '2026-12-06T13:00:00Z',
+    banner: null,
+  },
+];
+
+const PREDICTION_DRIVERS = new Set([
+  'Lando Norris', 'Oscar Piastri', 'George Russell', 'Kimi Antonelli',
+  'Max Verstappen', 'Isack Hadjar', 'Charles Leclerc', 'Lewis Hamilton',
+  'Alex Albon', 'Carlos Sainz', 'Liam Lawson', 'Arvid Lindblad',
+  'Fernando Alonso', 'Lance Stroll', 'Pierre Gasly', 'Franco Colapinto',
+  'Rafael Camara', 'Oliver Bearman', 'Nico Hulkenberg', 'Gabriel Bortoleto',
+  'Valtteri Bottas', 'Sergio Perez',
+]);
+
+type PredictionRace = typeof PREDICTION_RACES[number];
+
+function getAvailablePredictionRace(publishedRound: number): PredictionRace | null {
+  return PREDICTION_RACES.find((race) => race.unlockAfterRound === publishedRound) ?? null;
+}
+
+function predictionRaceId(race: PredictionRace, mode: PredictionMode): string {
+  return mode === 'qualifying' ? `${race.id}-q` : race.id;
+}
+
+function isPredictionOpen(race: PredictionRace, mode: PredictionMode, now: number): boolean {
+  const deadline = mode === 'qualifying' ? race.qualifyingDeadline : race.raceDeadline;
+  return now < Date.parse(deadline);
+}
 
 function getRedis() {
   return createClient({ url: process.env.REDIS_URL });
@@ -52,7 +88,7 @@ export default async function handler(req: any, res: any) {
         return res.status(403).json({ error: 'Приём прогнозов на этот этап завершён' });
       }
       if (new Set(picks).size !== 5 || !picks.every((p) =>
-        typeof p === 'string' && PREDICTION_DRIVERS.includes(p as typeof PREDICTION_DRIVERS[number])
+        typeof p === 'string' && PREDICTION_DRIVERS.has(p)
       )) {
         return res.status(400).json({ error: 'Выбери пять разных пилотов' });
       }
