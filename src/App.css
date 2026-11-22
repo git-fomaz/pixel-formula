@@ -80,6 +80,143 @@ main {
   letter-spacing: -0.3px;
 }
 
+/* Home championship banner: keep the original pixel car art, but render standings
+   as real text so race points and driver order can be updated accurately. */
+.championship-banner {
+  margin: 0 0 16px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #f5f5f5;
+  box-shadow: var(--shadow-soft);
+  color: #171717;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+.championship-banner__art {
+  aspect-ratio: 1168 / 386;
+  overflow: hidden;
+}
+
+.championship-banner__art img {
+  width: 100%;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.championship-banner__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 10px 9px;
+  font-size: clamp(14px, 3.7vw, 21px);
+  font-weight: 900;
+  letter-spacing: -0.7px;
+  white-space: nowrap;
+}
+
+.championship-banner__flag {
+  flex: 1 1 22px;
+  max-width: 72px;
+  min-width: 16px;
+  height: 16px;
+  transform: skew(-12deg);
+  background: conic-gradient(#191919 25%, #f5f5f5 0 50%, #191919 0 75%, #f5f5f5 0) 0 0 / 16px 16px;
+}
+
+.championship-banner__standings {
+  list-style: none;
+  margin: 0;
+  padding: 0 9px;
+  display: grid;
+  gap: 4px;
+}
+
+.championship-banner__row {
+  display: grid;
+  grid-template-columns: clamp(26px, 8%, 38px) minmax(0, 1fr) minmax(73px, 32%) minmax(65px, 22%);
+  align-items: center;
+  gap: 4px;
+  min-height: 33px;
+  background: #ffffff;
+  font-size: clamp(11px, 2.8vw, 15px);
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.championship-banner__rank {
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  background: #171717;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 1.15em;
+}
+
+.championship-banner__driver {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.championship-banner__team {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  clip-path: polygon(13% 0, 100% 0, 87% 100%, 0 100%);
+  padding: 0 10px;
+  font-size: 0.88em;
+  font-weight: 900;
+  text-align: center;
+}
+
+.championship-banner__team--mercedes {
+  color: #fff;
+  background: linear-gradient(110deg, #08bfb2 0 24%, #101415 24% 81%, #08bfb2 81%);
+}
+
+.championship-banner__team--red-bull {
+  color: #ffe033;
+  background: linear-gradient(110deg, #152656 0 76%, #f69f14 76%);
+}
+
+.championship-banner__team--ferrari {
+  color: #fff;
+  background: #c81520;
+}
+
+.championship-banner__team--mclaren {
+  color: #171717;
+  background: linear-gradient(110deg, #ff8400 0 80%, #222 80%);
+}
+
+.championship-banner__points {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  clip-path: polygon(11% 0, 91% 0, 100% 50%, 91% 100%, 11% 100%, 0 50%);
+  background: #171717;
+  color: #fff;
+  font-size: 1.15em;
+  font-variant-numeric: tabular-nums;
+}
+
+.championship-banner__points small {
+  font-size: 0.72em;
+}
+
+.championship-banner__updated {
+  padding: 7px 10px 10px;
+  text-align: right;
+  color: #5b5b5b;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
 .ios-card,
 .pixel-card {
   background: var(--bg-elevated);
