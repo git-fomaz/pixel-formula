@@ -5,6 +5,16 @@ import { fetchLastResults, DRIVER_AVATAR, driverInitials, type LastRacePayload }
 
 const DEADLINE = '2026-11-22T04:00:00Z';
 
+// Official drivers' championship standings after the 2026 Las Vegas GP (round 21).
+// Keep this as text instead of baking the numbers into the header artwork.
+const CHAMPIONSHIP_TOP_FIVE = [
+  { name: 'ANTONELLI', team: 'MERCEDES', teamClass: 'mercedes', points: 402 },
+  { name: 'VERSTAPPEN', team: 'RED BULL', teamClass: 'red-bull', points: 304 },
+  { name: 'HAMILTON', team: 'FERRARI', teamClass: 'ferrari', points: 267 },
+  { name: 'RUSSELL', team: 'MERCEDES', teamClass: 'mercedes', points: 264 },
+  { name: 'NORRIS', team: 'MCLAREN', teamClass: 'mclaren', points: 264 },
+] as const;
+
 export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [now, setNow] = useState(Date.now());
@@ -36,13 +46,29 @@ export default function Home() {
 
   return (
     <div className="pixel-page">
-      <div style={{ margin: '0 0 16px', borderRadius: 20, overflow: 'hidden', boxShadow: 'var(--shadow-soft)' }}>
-        <img
-          src="/header-banner.jpg"
-          alt="2026 F1 Championship — Antonelli leading"
-          style={{ width: '100%', display: 'block', imageRendering: 'pixelated' }}
-        />
-      </div>
+      <section className="championship-banner" aria-label="Топ-5 чемпионата Формулы-1 2026 после Гран-при Лас-Вегаса">
+        <div className="championship-banner__art">
+          <img src="/header-verstappen-vegas.webp" alt="Пиксель-арт Red Bull Макса Ферстаппена с флагом США" />
+        </div>
+        <div className="championship-banner__heading">
+          <span className="championship-banner__flag" aria-hidden="true" />
+          <span>2026 F1 CHAMPIONSHIP</span>
+          <span className="championship-banner__flag" aria-hidden="true" />
+        </div>
+        <ol className="championship-banner__standings">
+          {CHAMPIONSHIP_TOP_FIVE.map((driver, index) => (
+            <li className="championship-banner__row" key={driver.name}>
+              <span className="championship-banner__rank">{index + 1}.</span>
+              <span className="championship-banner__driver">{driver.name}</span>
+              <span className={`championship-banner__team championship-banner__team--${driver.teamClass}`}>
+                {driver.team}
+              </span>
+              <span className="championship-banner__points">{driver.points} <small>PTS</small></span>
+            </li>
+          ))}
+        </ol>
+        <div className="championship-banner__updated">ПОСЛЕ ГП ЛАС-ВЕГАСА · 22.11.2026</div>
+      </section>
 
       <h2>Привет{user ? `, ${user.first_name}` : ''}!</h2>
 
