@@ -7,7 +7,7 @@ type Rarity = 'Basic' | 'Rare' | 'Unique' | 'Masterpiece';
 
 function odds(h: number) {
   return {
-    Basic: Math.round((86.9 - 3.18 * h) * 100) / 100,
+    Basic: Math.max(0, Math.round((86.9 - 3.18 * h) * 100) / 100),
     Rare: 10 + 2 * h,
     Unique: 3 + 0.6 * h,
     Masterpiece: Math.round((0.1 + 0.58 * h) * 100) / 100,
@@ -28,10 +28,11 @@ function choose(h: number) {
     sum += rates[rarity];
     if (roll < sum) {
       const pool = PF_CARDS.filter(c => c.rarity === rarity);
+      if (pool.length === 0) break;
       return pool[Math.floor(random() * pool.length)];
     }
   }
-  return PF_CARDS[0];
+  return PF_CARDS.find(c => c.rarity === 'Basic') || PF_CARDS[0];
 }
 
 const KEY = 'pf:rewards:v1';
@@ -61,16 +62,27 @@ const rarityColor: Record<string, string> = {
   Masterpiece: '#ff9f0a',
 };
 
+function getTelegramUserId(): string | null {
+  try {
+    const tg = (window as any).Telegram?.WebApp;
+    const id = tg?.initDataUnsafe?.user?.id;
+    return id ? String(id) : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function Reward() {
-  const [hits, setHits] = useState(3);
-  const [current, setCurrent] = useState<{ key: string; raceName: string; hits: number; demo: boolean } | null>(null);
-  const [opened, setOpened] = useState<any>(null);
-  const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState('');
   const [predicted, setPredicted] = useState(false);
   const [results, setResults] = useState<LastRacePayload | null>(null);
   const [loadingResults, setLoadingResults] = useState(true);
+  const [racePoints, setRacePoints] = useState<number | null>(null);
+  const [opened, setOpened] = useState<any>(null);
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState('');
   const [now, setNow] = useState(Date.now());
+
+  const raceKey = `race:${CURRENT_RACE.id}`;
 
   useEffect(() => {
     setPredicted(hasPrediction());
@@ -90,35 +102,46 @@ export default function Reward() {
   }, [predicted]);
 
   useEffect(() => {
-    try {
-      const prev = JSON.parse(localStorage.getItem('pf:reward:demo-current') || 'null');
-      if (prev) {
-        setCurrent(prev);
-        setHits(prev.hits);
-        const db = loadDb();
-        if (db.awards[prev.key]) setOpened(db.awards[prev.key]);
-      }
-    } catch {}
-  }, []);
+    const userId = getTelegramUserId();
+    if (!userId || !results) return;
 
-  const rates = useMemo(() => current ? odds(current.hits) : odds(hits), [current, hits]);
+    fetch(`/api/score?userId=${userId}&raceId=${CURRENT_RACE.id}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data && typeof data.points === 'number') {
+          setRacePoints(data.points);
+        } else {
+          setRacePoints(0);
+        }
+      })
+      .catch(() => setRacePoints(0));
 
-  const startDemo = () => {
-    const next = { demo: true, key: 'demo:' + Date.now() + ':' + random(), raceName: 'Демо-заезд', hits };
-    localStorage.setItem('pf:reward:demo-current', JSON.stringify(next));
-    setCurrent(next);
-    setOpened(null);
-    setStatus('');
-  };
+    const db = loadDb();
+    if (db.awards[raceKey]) {
+      setOpened(db.awards[raceKey]);
+    }
+  }, [results, raceKey]);
+
+  const h = useMemo(() => {
+    if (racePoints === null) return 0;
+    return Math.min(5, racePoints / 10);
+  }, [racePoints]);
+
+  const rates = useMemo(() => odds(h), [h]);
 
   const openReward = () => {
-    if (!current || busy || opened) return;
+    if (busy || opened || racePoints === null) return;
     setBusy(true);
     setStatus('Открываем…');
     setTimeout(() => {
-      const card = choose(current.hits);
-      const award = { cardId: card.id, demo: true, at: new Date().toISOString() };
-      saveAward(current.key, award);
+      const card = choose(h);
+      const award = {
+        cardId: card.id,
+        raceId: CURRENT_RACE.id,
+        points: racePoints,
+        at: new Date().toISOString(),
+      };
+      saveAward(raceKey, award);
       setOpened(award);
       setStatus('Карточка сохранена');
       setBusy(false);
@@ -126,15 +149,9 @@ export default function Reward() {
   };
 
   const card = opened ? PF_CARDS.find(c => c.id === opened.cardId) : null;
-  const awards = useMemo(() => {
-    const db = loadDb();
-    return Object.values(db.awards).filter((a: any) => a && a.demo === true);
-  }, [opened]);
-
-  const nextMs = Date.parse(CURRENT_RACE.start) - now;
   const resultsReady = !!results?.results?.length;
+  const nextMs = Date.parse(CURRENT_RACE.start) - now;
 
-  // 1. No prediction → block
   if (!predicted) {
     return (
       <div className="pixel-page">
@@ -151,7 +168,6 @@ export default function Reward() {
     );
   }
 
-  // 2. Prediction exists but results not ready yet
   if (!loadingResults && !resultsReady) {
     return (
       <div className="pixel-page">
@@ -162,129 +178,92 @@ export default function Reward() {
           <p className="muted" style={{ margin: '0 0 16px' }}>
             Прогноз принят. Как только результаты подтянутся — сможешь открыть награду.
           </p>
-          <div className="muted" style={{ fontSize: 13 }}>До начала следующей гонки</div>
-          <div style={{ fontSize: 32, fontWeight: 700, fontVariantNumeric: 'tabular-nums', letterSpacing: -1, marginTop: 4 }}>
-            {formatCountdown(nextMs)}
-          </div>
-          <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>{CURRENT_RACE.name}</div>
+          {nextMs > 0 && (
+            <div className="muted" style={{ fontSize: 13 }}>
+              До начала следующей гонки: {formatCountdown(nextMs)}
+            </div>
+          )}
         </div>
-        <Link to="/predict" className="ios-btn secondary" style={{ marginTop: 16 }}>К прогнозу</Link>
       </div>
     );
   }
 
-  // 3. Results ready → normal reward UI
   return (
     <div className="pixel-page">
       <h2>Награда</h2>
-      <p className="muted">Локальный прототип. Результаты пока не подтверждаются сервером.</p>
 
       <div className="ios-card">
-        <div style={{ fontWeight: 600, marginBottom: 4 }}>Демо открытия</div>
-        <p className="muted" style={{ marginTop: 0 }}>Тестовые награды хранятся отдельно от наград за этапы.</p>
-        <label className="muted" style={{ fontSize: 13 }}>Точные позиции</label>
-        <select value={hits} onChange={e => setHits(Number(e.target.value))} style={{ marginTop: 6, marginBottom: 12 }}>
-          {[0,1,2,3,4,5].map(n => <option key={n} value={n}>{n} из 5</option>)}
-        </select>
-        <button onClick={startDemo} className="ios-btn">Начать новый демо-заезд</button>
-      </div>
-
-      {current && (
-        <div className="ios-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontWeight: 700 }}>{current.raceName}</div>
-            <span style={{
-              background: 'rgba(10, 132, 255, 0.2)',
-              color: 'var(--accent)',
-              padding: '4px 10px',
-              borderRadius: 999,
-              fontSize: 13,
-              fontWeight: 600,
-            }}>{current.hits} / 5</span>
-          </div>
-
-          <div className="section-title">Шансы</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            {(['Basic','Rare','Unique','Masterpiece'] as Rarity[]).map(r => (
-              <div key={r} style={{
-                background: 'var(--bg-secondary)',
-                borderRadius: 12,
-                padding: 12,
-                color: rarityColor[r],
-              }}>
-                <div style={{ fontSize: 13, opacity: 0.8 }}>{r}</div>
-                <div style={{ fontSize: 22, fontWeight: 700, marginTop: 4 }}>
-                  {rates[r].toLocaleString('ru-RU', { maximumFractionDigits: 2 })}%
-                </div>
-              </div>
-            ))}
-          </div>
-          <p className="muted" style={{ marginTop: 12, marginBottom: 16, fontSize: 13 }}>
-            Сначала выбирается редкость, затем с равным шансом — одна из карточек этой категории. Повторы возможны.
-          </p>
-
-          <div style={{ display: 'grid', placeItems: 'center', minHeight: 260, margin: '8px 0' }}>
-            {!card && (
-              <div style={{
-                width: 'min(220px, 70vw)',
-                aspectRatio: '2/3',
-                borderRadius: 20,
-                background: 'linear-gradient(145deg, #2c2c2e, #1c1c1e)',
-                border: '1px solid var(--separator)',
-                display: 'grid',
-                placeContent: 'center',
-                textAlign: 'center',
-                boxShadow: 'var(--shadow)',
-                fontSize: 22,
-                fontWeight: 700,
-                letterSpacing: 1,
-                animation: busy ? 'pulse 0.6s ease-in-out infinite' : undefined,
-              }}>
-                <div>PF</div>
-                <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--label-secondary)', marginTop: 4 }}>REWARD</div>
-              </div>
-            )}
-            {card && (
-              <div style={{ textAlign: 'center', maxWidth: 280 }}>
-                <img src={card.image} alt={card.name} style={{
-                  width: '100%',
-                  borderRadius: 16,
-                  border: `2px solid ${rarityColor[card.rarity]}`,
-                  boxShadow: `0 8px 32px ${rarityColor[card.rarity]}40`,
-                  display: 'block',
-                }} />
-                <div style={{ fontWeight: 700, fontSize: 20, marginTop: 12 }}>{card.name}</div>
-                <div style={{ color: rarityColor[card.rarity], fontWeight: 600, marginTop: 2 }}>{card.rarity}</div>
-              </div>
-            )}
-          </div>
-
-          {status && <p style={{ textAlign: 'center', color: 'var(--accent-green)', fontWeight: 500, margin: '8px 0' }}>{status}</p>}
-
-          <button onClick={openReward} disabled={!!opened || busy} className="ios-btn" style={{ opacity: opened || busy ? 0.5 : 1 }}>
-            {opened ? 'Награда получена' : busy ? 'Открываем…' : 'Открыть награду'}
-          </button>
+        <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 4 }}>{results?.raceName || CURRENT_RACE.name}</div>
+        <div className="muted" style={{ fontSize: 14, marginBottom: 12 }}>
+          Очки за гонку: <b style={{ color: 'var(--accent-red)' }}>{racePoints ?? '…'}</b>
         </div>
-      )}
 
-      <div className="section-title">Демо-коллекция</div>
-      <div className="ios-card">
-        {awards.length === 0 && <p className="muted" style={{ margin: 0 }}>Здесь появятся открытые карточки.</p>}
-        <div className="card-grid">
-          {awards.map((a: any, i) => {
-            const c = PF_CARDS.find(x => x.id === a.cardId);
-            if (!c) return null;
-            return (
-              <div key={i} className="card-item">
-                <img src={c.image} alt={c.name} />
-                <div className="meta">
-                  <div style={{ fontWeight: 600 }}>{c.name}</div>
-                  <div style={{ color: rarityColor[c.rarity], fontSize: 12 }}>{c.rarity}</div>
-                </div>
-              </div>
-            );
-          })}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
+          {(['Basic', 'Rare', 'Unique', 'Masterpiece'] as Rarity[]).map(r => (
+            <div key={r} style={{
+              background: 'var(--fill-tertiary)',
+              borderRadius: 12,
+              padding: '10px 12px',
+              textAlign: 'center',
+            }}>
+              <div style={{ fontSize: 12, color: rarityColor[r], fontWeight: 600 }}>{r}</div>
+              <div style={{ fontSize: 18, fontWeight: 700 }}>{rates[r].toFixed(1)}%</div>
+            </div>
+          ))}
         </div>
+
+        <div style={{
+          minHeight: 280,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 16,
+        }}>
+          {!card && (
+            <div style={{
+              width: 200,
+              height: 280,
+              borderRadius: 16,
+              background: 'linear-gradient(135deg, #c41e3a 0%, #8e8e93 100%)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              fontWeight: 700,
+              fontSize: 24,
+              letterSpacing: 1,
+              animation: busy ? 'pulse 0.6s ease-in-out infinite' : undefined,
+            }}>
+              <div>PF</div>
+              <div style={{ fontSize: 13, fontWeight: 500, marginTop: 4 }}>REWARD</div>
+            </div>
+          )}
+          {card && (
+            <div style={{ textAlign: 'center', maxWidth: 280 }}>
+              <img src={card.image} alt={card.name} style={{
+                width: '100%',
+                borderRadius: 16,
+                border: `2px solid ${rarityColor[card.rarity]}`,
+                boxShadow: `0 8px 32px ${rarityColor[card.rarity]}40`,
+                display: 'block',
+              }} />
+              <div style={{ fontWeight: 700, fontSize: 20, marginTop: 12 }}>{card.name}</div>
+              <div style={{ color: rarityColor[card.rarity], fontWeight: 600, marginTop: 2 }}>{card.rarity}</div>
+            </div>
+          )}
+        </div>
+
+        {status && <p style={{ textAlign: 'center', color: 'var(--accent-green)', fontWeight: 500, margin: '8px 0' }}>{status}</p>}
+
+        <button
+          onClick={openReward}
+          disabled={!!opened || busy || racePoints === null}
+          className="ios-btn"
+          style={{ opacity: opened || busy ? 0.5 : 1 }}
+        >
+          {opened ? 'Награда получена' : busy ? 'Открываем…' : 'Получить награду'}
+        </button>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
