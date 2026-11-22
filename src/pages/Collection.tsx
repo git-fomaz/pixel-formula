@@ -33,6 +33,7 @@ export default function Collection() {
   const [rarity, setRarity] = useState<Rarity>('all');
   const [detail, setDetail] = useState<(typeof PF_CARDS)[0] | null>(null);
   const [bonusCardId, setBonusCardId] = useState<string | null>(null);
+  const [bonusReason, setBonusReason] = useState<string | null>(null);
 
   const owned = useMemo(() => {
     const ids = loadOwned();
@@ -45,10 +46,13 @@ export default function Collection() {
       const tg = (window as any).Telegram?.WebApp;
       const userId = tg?.initDataUnsafe?.user?.id;
       if (!userId) return;
-      fetch(`/api/bonus-card?userId=${userId}`)
+      fetch(`/api/award?userId=${userId}`)
         .then(r => r.ok ? r.json() : null)
         .then(data => {
-          if (data?.cardId) setBonusCardId(data.cardId);
+          if (data?.cardId) {
+            setBonusCardId(data.cardId);
+            setBonusReason(data.reason || 'За первый прогноз');
+          }
         })
         .catch(() => {});
     } catch {}
@@ -117,9 +121,9 @@ export default function Collection() {
                 Лимитированная карта бета-тестеров приложения
               </p>
             )}
-            {bonusCardId && detail.id === bonusCardId && (
+            {bonusCardId && detail.id === bonusCardId && bonusReason && (
               <p style={{ marginTop: 12, fontSize: 15, lineHeight: 1.4 }}>
-                За первый успешный прогноз на квалификацию
+                {bonusReason}
               </p>
             )}
             <button onClick={() => setDetail(null)} className="ios-btn secondary" style={{ marginTop: 12 }}>Закрыть</button>
