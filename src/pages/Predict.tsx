@@ -1,21 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
-
-const DRIVERS = [
-  'Lando Norris', 'Oscar Piastri', 'George Russell', 'Kimi Antonelli',
-  'Max Verstappen', 'Isack Hadjar', 'Charles Leclerc', 'Lewis Hamilton',
-  'Alex Albon', 'Carlos Sainz', 'Liam Lawson', 'Arvid Lindblad',
-  'Fernando Alonso', 'Lance Stroll', 'Pierre Gasly', 'Franco Colapinto',
-  'Rafael Camara', 'Oliver Bearman', 'Nico Hulkenberg', 'Gabriel Bortoleto',
-  'Valtteri Bottas', 'Sergio Perez'
-];
-
-const RACE = {
-  id: 'las-vegas-2026',
-  deadline: '2026-11-22T04:00:00Z',          // старт гонки
-  qualifyingDeadline: '2026-11-21T03:00:00Z', // квалификация уже началась
-};
-
-type Mode = 'race' | 'qualifying';
+import {
+  predictionDeadline,
+  predictionRaceId,
+  PREDICTION_DRIVERS,
+  type PredictionMode,
+  type PredictionRace,
+} from '../lib/predictionSchedule';
 
 function getTelegramUser() {
   try {
@@ -26,69 +16,101 @@ function getTelegramUser() {
   return { id: 'guest', name: 'Guest' };
 }
 
-function storageKey(mode: Mode) {
-  return mode === 'race' ? `pf:prediction:${RACE.id}` : `pf:prediction:${RACE.id}-q`;
-}
-
-function serverRaceId(mode: Mode) {
-  return mode === 'race' ? RACE.id : `${RACE.id}-q`;
-}
-
-function deadlineFor(mode: Mode) {
-  return mode === 'race' ? RACE.deadline : RACE.qualifyingDeadline;
+function storageKey(race: PredictionRace, mode: PredictionMode) {
+  return `pf:prediction:${predictionRaceId(race, mode)}`;
 }
 
 export default function Predict() {
-  const [mode, setMode] = useState<Mode>('race');
+  const [mode, setMode] = useState<PredictionMode>('race');
+  const [race, setRace] = useState<PredictionRace | null>(null);
+  const [raceLoading, setRaceLoading] = useState(true);
+  const [raceError, setRaceError] = useState(false);
   const [picks, setPicks] = useState<string[]>(Array(5).fill(''));
   const [saved, setSaved] = useState<{ picks: string[]; savedAt: string } | null>(null);
   const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [showRules, setShowRules] = useState(false);
   const [now, setNow] = useState(Date.now());
   const user = useMemo(getTelegramUser, []);
 
   useEffect(() => {
-    const key = storageKey(mode);
-    const rid = serverRaceId(mode);
+    let active = true;
+    const refreshRace = async () => {
+      try {
+        const res = await fetch('/api/prediction?status=current', { cache: 'no-store' });
+        if (!res.ok) throw new Error('Не удалось получить текущий этап');
+        const data = await res.json();
+        if (active) {
+          setRace(data.race ?? null);
+          setRaceError(false);
+        }
+      } catch {
+        if (active) setRaceError(true);
+      } finally {
+        if (active) setRaceLoading(false);
+      }
+    };
 
-    // Reset state
+    void refreshRace();
+    // An already-open page unlocks the next round after result publication.
+    const interval = window.setInterval(refreshRace, 60_000);
+    window.addEventListener('focus', refreshRace);
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+      window.removeEventListener('focus', refreshRace);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!race) return;
+
+    const key = storageKey(race, mode);
+    const rid = predictionRaceId(race, mode);
+    let active = true;
+    const controller = new AbortController();
+
     setPicks(Array(5).fill(''));
     setSaved(null);
     setEditing(false);
+    setSaveError('');
 
-    // Load local
     try {
       const raw = localStorage.getItem(key);
       if (raw) {
         const v = JSON.parse(raw);
-        if (v.picks?.length === 5 && new Date(v.savedAt).getTime() < Date.parse(deadlineFor(mode))) {
+        if (v.picks?.length === 5 && new Date(v.savedAt).getTime() < Date.parse(predictionDeadline(race, mode))) {
           setSaved(v);
           setPicks(v.picks);
         }
       }
     } catch {}
 
-    // Load from server
     if (user.id !== 'guest') {
-      fetch(`/api/prediction?userId=${user.id}&raceId=${rid}`)
+      fetch(`/api/prediction?userId=${encodeURIComponent(user.id)}&raceId=${rid}`, { signal: controller.signal })
         .then(r => r.ok ? r.json() : null)
         .then(data => {
-          if (data?.picks?.length === 5 && data.picks.every((p: string) => DRIVERS.includes(p))) {
+          if (active && data?.picks?.length === 5 && data.picks.every((p: string) =>
+            PREDICTION_DRIVERS.includes(p as typeof PREDICTION_DRIVERS[number])
+          )) {
             setSaved({ picks: data.picks, savedAt: data.savedAt });
             setPicks(data.picks);
           }
         })
         .catch(() => {});
     }
-  }, [mode, user.id]);
+
+    return () => { active = false; controller.abort(); };
+  }, [race?.id, mode, user.id]);
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
 
-  const deadline = deadlineFor(mode);
-  const ms = Date.parse(deadline) - now;
+  const deadline = race ? predictionDeadline(race, mode) : null;
+  const ms = deadline ? Date.parse(deadline) - now : 0;
   const closed = ms <= 0;
   const clock = ms > 0
     ? `${Math.floor(ms / 86400000)}д ${String(Math.floor(ms / 3600000) % 24).padStart(2, '0')}:${String(Math.floor(ms / 60000) % 60).padStart(2, '0')}:${String(Math.floor(ms / 1000) % 60).padStart(2, '0')}`
@@ -98,48 +120,88 @@ export default function Predict() {
     const next = [...picks];
     next[index] = value;
     setPicks(next);
+    setSaveError('');
   };
 
   const save = async () => {
-    if (picks.filter(Boolean).length !== 5 || new Set(picks).size !== 5) {
-      alert('Выбери пять разных пилотов');
+    if (!race || !deadline || saving) return;
+    if (Date.now() >= Date.parse(deadline)) {
+      setSaveError('Приём прогнозов уже завершён');
+      setNow(Date.now());
       return;
     }
-    const next = { picks: [...picks], savedAt: new Date().toISOString() };
-    localStorage.setItem(storageKey(mode), JSON.stringify(next));
-    setSaved(next);
-    setEditing(false);
+    if (picks.filter(Boolean).length !== 5 || new Set(picks).size !== 5) {
+      setSaveError('Выбери пять разных пилотов');
+      return;
+    }
 
-    if (user.id !== 'guest') {
-      try {
-        await fetch('/api/prediction', {
+    setSaving(true);
+    setSaveError('');
+    try {
+      let savedAt = new Date().toISOString();
+      if (user.id !== 'guest') {
+        const response = await fetch('/api/prediction', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             userId: user.id,
-            raceId: serverRaceId(mode),
+            raceId: predictionRaceId(race, mode),
             picks,
             name: user.name,
           }),
         });
-      } catch {}
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Не удалось сохранить прогноз');
+        savedAt = data.prediction.savedAt;
+      }
+
+      const next = { picks: [...picks], savedAt };
+      localStorage.setItem(storageKey(race, mode), JSON.stringify(next));
+      setSaved(next);
+      setEditing(false);
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Не удалось сохранить прогноз');
+    } finally {
+      setSaving(false);
     }
   };
 
   const showEditor = !closed && (!saved || editing);
   const status = closed ? (saved ? 'Приём закрыт' : 'Этап пропущен') : saved && !editing ? 'Прогноз принят' : 'Приём открыт';
 
+  if (raceLoading) {
+    return <div className="pixel-page"><div className="ios-card">Проверяем доступные прогнозы…</div></div>;
+  }
+  if (raceError) {
+    return <div className="pixel-page"><div className="ios-card">Не удалось проверить текущий этап. Обнови страницу чуть позже.</div></div>;
+  }
+  if (!race) {
+    return (
+      <div className="pixel-page">
+        <h2>Прогнозы</h2>
+        <div className="ios-card">Приём на следующий этап откроется после публикации результатов предыдущей гонки. Если сезон завершён, новых этапов пока нет.</div>
+      </div>
+    );
+  }
+
+  const deadlineMoscow = new Date(deadline!).toLocaleString('ru-RU', {
+    day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Moscow',
+  });
+
   return (
     <div className="pixel-page">
-      <h2>Гран-при Лас-Вегаса</h2>
-      <p className="muted">20–22 ноября 2026 · Las Vegas Strip Circuit</p>
+      <h2>{race.name}</h2>
+      <p className="muted">{race.weekend} · {race.circuit}</p>
 
       <div className="ios-card" style={{ overflow: 'hidden', padding: 0, border: '2px solid transparent', backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, var(--ferrari), var(--mercedes))', backgroundOrigin: 'border-box', backgroundClip: 'padding-box, border-box' }}>
-        <img
-          src="/predict-banner.jpg"
-          alt="Kimi Antonelli with trophy, George Russell and Charles Leclerc"
-          style={{ width: '100%', display: 'block', imageRendering: 'pixelated' }}
-        />
+        {race.banner ? (
+          <img src={race.banner} alt="Ночная трасса Лусаил, город и флаг Катара в пиксельном стиле"
+            style={{ width: '100%', height: 210, objectFit: 'cover', objectPosition: 'center 43%', display: 'block', imageRendering: 'pixelated' }} />
+        ) : (
+          <div role="img" aria-label="Гран-при Абу-Даби, трасса Яс-Марина" style={{ height: 180, background: 'linear-gradient(135deg, #0d2454, #44366d, #bc6798)', display: 'grid', placeItems: 'center', color: 'white', fontSize: 25, fontWeight: 800 }}>
+            🇦🇪 YAS MARINA
+          </div>
+        )}
       </div>
 
       {/* Mode switcher */}
@@ -185,7 +247,7 @@ export default function Predict() {
             <div style={{ fontSize: 32, fontWeight: 700, fontVariantNumeric: 'tabular-nums', letterSpacing: -1 }}>{clock}</div>
           </>
         )}
-        <p className="muted" style={{ marginTop: 8, marginBottom: 0 }}>Дедлайн: {mode === 'race' ? '22 ноября, 07:00 МСК' : 'Квалификация закрыта'}</p>
+        <p className="muted" style={{ marginTop: 8, marginBottom: 0 }}>Дедлайн: {deadlineMoscow} МСК</p>
         <button
           onClick={() => setShowRules(true)}
           className="ios-btn secondary"
@@ -215,16 +277,17 @@ export default function Predict() {
               }}>{i + 1}</span>
               <select value={v} onChange={e => update(i, e.target.value)}>
                 <option value="">Выбрать пилота</option>
-                {DRIVERS.map(d => (
+                {PREDICTION_DRIVERS.map(d => (
                   <option key={d} value={d} disabled={picks.includes(d) && picks[i] !== d}>{d}</option>
                 ))}
               </select>
             </label>
           ))}
           <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
-            <button onClick={save} className="ios-btn">Подтвердить прогноз</button>
+            <button onClick={save} className="ios-btn" disabled={saving}>{saving ? 'Сохраняем…' : 'Подтвердить прогноз'}</button>
             {saved && <button onClick={() => setEditing(false)} className="ios-btn secondary" style={{ width: 'auto' }}>Отмена</button>}
           </div>
+          {saveError && <p role="alert" style={{ color: 'var(--ferrari)', marginBottom: 0 }}>{saveError}</p>}
         </div>
       )}
 
@@ -244,7 +307,7 @@ export default function Predict() {
           <ol style={{ paddingLeft: 20, margin: 0 }}>
             {saved.picks.map((p, i) => (
               <li key={i} style={{ marginBottom: 6 }}>
-                {DRIVERS.includes(p) ? p : '—'}
+                {PREDICTION_DRIVERS.includes(p as typeof PREDICTION_DRIVERS[number]) ? p : '—'}
               </li>
             ))}
           </ol>
