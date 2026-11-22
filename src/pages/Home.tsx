@@ -3,8 +3,6 @@ import { Link } from 'react-router-dom';
 import { getNextRace, RACES } from '../data/f1Data';
 import { fetchLastResults, DRIVER_AVATAR, driverInitials, type LastRacePayload } from '../lib/race';
 
-const DEADLINE = '2026-11-22T04:00:00Z';
-
 // Official drivers' championship standings after the 2026 Las Vegas GP (round 21).
 // Keep this as text instead of baking the numbers into the header artwork.
 const CHAMPIONSHIP_TOP_FIVE = [
@@ -19,7 +17,7 @@ export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [now, setNow] = useState(Date.now());
   const [lastRace, setLastRace] = useState<LastRacePayload | null>(null);
-  const nextRace = getNextRace();
+  const nextRace = getNextRace(now);
 
   useEffect(() => {
     try {
@@ -34,15 +32,19 @@ export default function Home() {
     return () => clearInterval(id);
   }, []);
 
-  const ms = Date.parse(DEADLINE) - now;
+  const ms = nextRace ? Date.parse(nextRace.startAt ?? nextRace.date) - now : 0;
   const clock = ms > 0
     ? `${Math.floor(ms / 86400000)}д ${String(Math.floor(ms / 3600000) % 24).padStart(2, '0')}:${String(Math.floor(ms / 60000) % 60).padStart(2, '0')}:${String(Math.floor(ms / 1000) % 60).padStart(2, '0')}`
     : '00:00:00';
 
   const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+    const d = new Date(`${dateStr}T00:00:00Z`);
+    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', timeZone: 'UTC' });
   };
+
+  const raceStartInMoscow = nextRace?.startAt
+    ? new Date(nextRace.startAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Moscow' })
+    : null;
 
   return (
     <div className="pixel-page">
@@ -83,22 +85,24 @@ export default function Home() {
       </div>
 
       <div className="section-title">Следующая гонка</div>
+      {nextRace ? (
       <div className="ios-card" style={{ display: 'grid', gridTemplateColumns: '1fr 160px', gap: 16, alignItems: 'center' }}>
         <div>
           <div style={{ fontSize: 20, fontWeight: 700 }}>{nextRace.name}</div>
           <div className="muted">{nextRace.circuit}</div>
           <div style={{ marginTop: 8, color: 'var(--ferrari)' }}>{formatDate(nextRace.date)}</div>
+          {raceStartInMoscow && <div className="muted" style={{ marginTop: 4, fontSize: 13 }}>Старт: {raceStartInMoscow} МСК</div>}
           <div style={{ marginTop: 16 }}>
-            <div className="muted" style={{ fontSize: 13 }}>До закрытия приёма</div>
-            <div style={{ fontSize: 17, fontWeight: 600, fontVariantNumeric: 'tabular-nums', letterSpacing: -0.3, marginTop: 4 }}>{clock}</div>
+            <div className="muted" style={{ fontSize: 13 }}>До старта гонки</div>
+            <div style={{ fontSize: 17, fontWeight: 600, fontVariantNumeric: 'tabular-nums', letterSpacing: -0.3, marginTop: 4, whiteSpace: 'nowrap' }}>{clock}</div>
           </div>
           <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>
             Всего этапов: {RACES.length}
           </div>
         </div>
-        <img
-          src="/vegas-banner.jpg"
-          alt="Las Vegas Grand Prix"
+        {nextRace.id === 23 ? <img
+          src="/qatar-banner.webp"
+          alt="Гран-при Катара: флаг Катара, трасса Лусаил и ночной город"
           style={{
             width: 160,
             height: 160,
@@ -107,8 +111,14 @@ export default function Home() {
             imageRendering: 'pixelated',
             border: '1px solid var(--separator)',
           }}
-        />
+        /> : <div aria-label="Гран-при Абу-Даби, трасса Яс-Марина" role="img" style={{
+          width: 160, height: 160, borderRadius: 16, border: '1px solid var(--separator)',
+          background: 'linear-gradient(150deg, #07254a, #3f3573 68%, #a05a87)',
+          color: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'center',
+          alignItems: 'center', gap: 12, textAlign: 'center', fontWeight: 800, fontSize: 16,
+        }}><span style={{ fontSize: 40 }}>🇦🇪</span><span>YAS MARINA</span></div>}
       </div>
+      ) : <div className="ios-card">Сезон 2026 завершён. До встречи в следующем сезоне!</div>}
 
       {lastRace && lastRace.results.length > 0 && (
         <>

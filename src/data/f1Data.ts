@@ -12,6 +12,8 @@ export interface Race {
   circuit: string;
   date: string;
   country: string;
+  /** Official race start in UTC, when known. */
+  startAt?: string;
 }
 
 export const DRIVERS: Driver[] = [
@@ -60,8 +62,8 @@ export const RACES: Race[] = [
   { id: 20, name: 'Mexico City GP', circuit: 'Hermanos Rodríguez', date: '2026-10-26', country: 'Mexico' },
   { id: 21, name: 'São Paulo GP', circuit: 'Interlagos', date: '2026-11-09', country: 'Brazil' },
   { id: 22, name: 'Las Vegas GP', circuit: 'Las Vegas Strip', date: '2026-11-22', country: 'USA' },
-  { id: 23, name: 'Qatar GP', circuit: 'Lusail', date: '2026-11-30', country: 'Qatar' },
-  { id: 24, name: 'Abu Dhabi GP', circuit: 'Yas Marina', date: '2026-12-07', country: 'UAE' },
+  { id: 23, name: 'Qatar GP', circuit: 'Lusail', date: '2026-11-29', country: 'Qatar', startAt: '2026-11-29T16:00:00Z' },
+  { id: 24, name: 'Abu Dhabi GP', circuit: 'Yas Marina', date: '2026-12-06', country: 'UAE', startAt: '2026-12-06T13:00:00Z' },
 ];
 
 export const POINTS_TABLE: Record<number, number> = {
@@ -107,7 +109,6 @@ export function getDriverPosition(driverId: number, results: RaceResult = MOCK_L
   return idx >= 0 ? idx + 1 : null;
 }
 
-export const getNextRace = (): Race => {
-  const now = new Date();
-  return RACES.find(r => new Date(r.date) > now) || RACES[RACES.length - 1];
+export const getNextRace = (now = Date.now()): Race | undefined => {
+  return RACES.find(r => Date.parse(r.startAt ?? r.date) > now);
 };
