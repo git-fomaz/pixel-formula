@@ -12,17 +12,26 @@ const RESULTS = [
 ];
 
 const POINTS = [15, 12, 10, 8, 8];
+const TOP_FIVE_POINTS = 4;
 const BONUS = [0, 0, 2, 5, 10, 20];
 
 function calculateScore(picks: string[], actual: string[]) {
-  const positions = picks.map((driver, i) => ({
-    matched: driver === actual[i],
-    points: driver === actual[i] ? POINTS[i] : 0,
-  }));
+  const topFive = new Set(actual.slice(0, 5));
+  const positions = picks.map((driver, i) => {
+    const matched = driver === actual[i];
+    const misplaced = !matched && topFive.has(driver);
+
+    return {
+      matched,
+      misplaced,
+      points: (matched ? POINTS[i] : misplaced ? TOP_FIVE_POINTS : 0),
+    };
+  });
   const exactHits = positions.filter(x => x.matched).length;
+  const misplacedHits = positions.filter(x => x.misplaced).length;
   const basePoints = positions.reduce((s, x) => s + x.points, 0);
   const bonusPoints = BONUS[exactHits];
-  return { totalPoints: basePoints + bonusPoints, exactHits };
+  return { totalPoints: basePoints + bonusPoints, exactHits, misplacedHits };
 }
 
 export default async function handler(req: any, res: any) {
@@ -69,7 +78,7 @@ export default async function handler(req: any, res: any) {
 
       let pred: any;
       try { pred = JSON.parse(predRaw); } catch { continue; }
-      if (!Array.isArray(pred.picks) || pred.picks.length !== 5) continue;
+      if (!Array.isArray(pred.picks) || pred.picks.length !== 5 || new Set(pred.picks).size !== 5) continue;
 
       const score = calculateScore(pred.picks, RESULTS);
 
@@ -82,6 +91,7 @@ export default async function handler(req: any, res: any) {
 
       await redis.set(alreadyKey, JSON.stringify({
         userId, raceId: RACE_ID, points: score.totalPoints, exact: score.exactHits,
+        misplaced: score.misplacedHits,
         scoredAt: new Date().toISOString(),
       }));
 
