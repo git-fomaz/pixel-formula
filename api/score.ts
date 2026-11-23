@@ -1,4 +1,4 @@
-import { createHmac, randomInt, timingSafeEqual } from 'node:crypto';
+import { createHash, createHmac, randomInt, timingSafeEqual } from 'node:crypto';
 import { createClient } from 'redis';
 
 const SEASON = '2026';
@@ -8,6 +8,7 @@ function getRedis() {
 }
 
 export default async function handler(req: any, res: any) {
+  if (req.query?.wallet === 'test-grant') return grantTestToken(req, res);
   if (req.query?.wallet === 'cards') return handleCardTokens(req, res);
 
   if (req.method === 'POST' && (!process.env.SCORE_SECRET || req.body?.secret !== process.env.SCORE_SECRET)) {
@@ -140,10 +141,13 @@ function drawCard() {
 
 // Each hash field records one token spent and its card. Checking the balance and
 // writing that field in one script prevents concurrent opens from overspending.
+const TEST_GRANT = `pf:${SEASON}:token-grant:november-test`;
+
 const OPEN_CARD = `
 local points = tonumber(redis.call('GET', KEYS[1])) or 0
 local spent = redis.call('HLEN', KEYS[2])
-local balance = math.max(0, math.floor(points / tonumber(ARGV[3])) - spent)
+local bonus = redis.call('SISMEMBER', KEYS[3], ARGV[4])
+local balance = math.max(0, math.floor(points / tonumber(ARGV[3])) + bonus - spent)
 local existing = redis.call('HGET', KEYS[2], ARGV[1])
 if existing then return {balance, existing} end
 if balance == 0 then return {0, ''} end
@@ -170,22 +174,51 @@ async function handleCardTokens(req: any, res: any) {
   try {
     await redis.connect();
     if (req.method === 'GET') {
-      const [rawPoints, cardIds] = await redis.multi().get(totalKey).hVals(cardsKey).exec();
+      const [rawPoints, cardIds, bonus] = await redis.multi()
+        .get(totalKey).hVals(cardsKey).sIsMember(TEST_GRANT, userId).exec();
       const points = Number(rawPoints) || 0;
       const cards = cardIds as unknown as string[];
-      const balance = Math.max(0, Math.floor(points / POINTS_PER_TOKEN) - cards.length);
+      const balance = Math.max(0, Math.floor(points / POINTS_PER_TOKEN) + Number(bonus) - cards.length);
       return res.status(200).json({ points, balance, cardIds: cards });
     }
 
     const [balance, cardId] = await redis.eval(OPEN_CARD, {
-      keys: [totalKey, cardsKey],
-      arguments: [requestId, drawCard(), String(POINTS_PER_TOKEN)],
+      keys: [totalKey, cardsKey, TEST_GRANT],
+      arguments: [requestId, drawCard(), String(POINTS_PER_TOKEN), userId],
     }) as [number, string];
     if (!cardId) return res.status(409).json({ balance, error: 'Недостаточно токенов.' });
     return res.status(200).json({ balance, cardId });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Не удалось загрузить награды. Попробуй ещё раз.' });
+  } finally {
+    if (redis.isOpen) await redis.quit().catch(() => {});
+  }
+}
+
+async function grantTestToken(req: any, res: any) {
+  res.setHeader('Cache-Control', 'no-store');
+  if (req.method !== 'POST') return res.status(405).end();
+  const key = req.headers['x-token-grant-key'];
+  if (typeof key !== 'string' || !/^[a-f0-9]{64}$/.test(key) ||
+      !timingSafeEqual(createHash('sha256').update(key).digest(), Buffer.from('8a5aab182362bf3597f2bd1014052a57ebff908f7e0d32bd2d2bcc05c5dca7c8', 'hex'))) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const redis = createClient({ url: process.env.REDIS_URL });
+  try {
+    await redis.connect();
+    const result = await redis.eval(`
+      if redis.call('EXISTS', KEYS[2]) == 1 then
+        return {0, tonumber(redis.call('GET', KEYS[2]))}
+      end
+      local count = redis.call('SUNIONSTORE', KEYS[1], KEYS[3])
+      redis.call('SET', KEYS[2], count)
+      return {1, count}
+    `, { keys: [TEST_GRANT, TEST_GRANT + ':done', `pf:${SEASON}:users`], arguments: [] }) as [number, number];
+    return res.status(200).json({ issued: result[0] === 1, users: result[1] });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Could not issue test tokens' });
   } finally {
     if (redis.isOpen) await redis.quit().catch(() => {});
   }
