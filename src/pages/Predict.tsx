@@ -193,7 +193,7 @@ export default function Predict() {
       <h2>{race.name}</h2>
       <p className="muted">{race.weekend} · {race.circuit}</p>
 
-      <div className="ios-card" style={{ overflow: 'hidden', padding: 0, border: '2px solid transparent', backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, var(--ferrari), var(--mercedes))', backgroundOrigin: 'border-box', backgroundClip: 'padding-box, border-box' }}>
+      <div className="ios-card" style={{ overflow: 'hidden', padding: 0, border: '2px solid transparent', backgroundImage: 'linear-gradient(var(--bg-elevated), var(--bg-elevated)), linear-gradient(135deg, var(--ferrari), var(--mercedes))', backgroundOrigin: 'border-box', backgroundClip: 'padding-box, border-box' }}>
         {race.banner ? (
           <img src={race.banner} alt="Ночная трасса Лусаил, город и флаг Катара в пиксельном стиле"
             style={{ width: '100%', height: 210, objectFit: 'cover', objectPosition: 'center 43%', display: 'block', imageRendering: 'pixelated' }} />
@@ -335,7 +335,7 @@ export default function Predict() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <div style={{ fontWeight: 700, fontSize: 18 }}>Правила начисления очков</div>
-              <button onClick={() => setShowRules(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
+              <button onClick={() => setShowRules(false)} aria-label="Закрыть правила" style={{ background: 'none', border: 'none', color: 'var(--label)', fontSize: 20, cursor: 'pointer' }}>✕</button>
             </div>
 
             <div style={{ fontWeight: 600, marginBottom: 6 }}>Гонка (×1)</div>
