@@ -1,25 +1,8 @@
 import { createClient } from 'redis';
+import { PREDICTION_RACES } from '../server/prediction-calendar.mjs';
 
 const SEASON = '2026';
 type PredictionMode = 'race' | 'qualifying';
-
-// Vercel runs this endpoint as a standalone Node function. Keep its schedule
-// self-contained (in sync with src/lib/predictionSchedule.ts) so the runtime
-// does not need to resolve a TypeScript module outside api/.
-const PREDICTION_RACES = [
-  {
-    id: 'qatar-2026', name: 'Гран-при Катара', circuit: 'Lusail International Circuit',
-    weekend: '27–29 ноября 2026', round: 22, unlockAfterRound: 21,
-    qualifyingDeadline: '2026-11-28T18:00:00Z', raceDeadline: '2026-11-29T16:00:00Z',
-    banner: '/qatar-banner.webp',
-  },
-  {
-    id: 'abu-dhabi-2026', name: 'Гран-при Абу-Даби', circuit: 'Yas Marina Circuit',
-    weekend: '4–6 декабря 2026', round: 23, unlockAfterRound: 22,
-    qualifyingDeadline: '2026-12-05T14:00:00Z', raceDeadline: '2026-12-06T13:00:00Z',
-    banner: null,
-  },
-];
 
 const PREDICTION_DRIVERS = new Set([
   'Lando Norris', 'Oscar Piastri', 'George Russell', 'Kimi Antonelli',
