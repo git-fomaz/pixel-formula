@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { PF_CARDS } from '../data/cards';
+import type { ThemeMode } from '../lib/theme';
 
 function loadSummary() {
   try {
@@ -48,7 +49,7 @@ const rarityColor: Record<string, string> = {
   Masterpiece: '#ff9f0a',
 };
 
-export default function Profile() {
+export default function Profile({ theme, onThemeChange }: { theme: ThemeMode; onThemeChange: (theme: ThemeMode) => void }) {
   const [user, setUser] = useState<any>(null);
   const [nickname, setNickname] = useState('');
   const [saving, setSaving] = useState(false);
@@ -157,6 +158,24 @@ export default function Profile() {
           )}
         </div>
       )}
+
+      <div className="section-title">Оформление</div>
+      <div className="ios-card">
+        <div style={{ fontWeight: 600 }}>Тема приложения</div>
+        <p className="muted" style={{ margin: '4px 0 12px', fontSize: 13 }}>
+          Выбери удобный вид Pixel Formula. Настройка сохранится на этом устройстве.
+        </p>
+        <div className="theme-switch" role="group" aria-label="Тема приложения">
+          <button type="button" className={`theme-option${theme === 'light' ? ' is-active' : ''}`}
+            aria-pressed={theme === 'light'} onClick={() => onThemeChange('light')}>
+            <span aria-hidden="true">☀️</span> Светлая
+          </button>
+          <button type="button" className={`theme-option${theme === 'dark' ? ' is-active' : ''}`}
+            aria-pressed={theme === 'dark'} onClick={() => onThemeChange('dark')}>
+            <span aria-hidden="true">🌙</span> Тёмная
+          </button>
+        </div>
+      </div>
 
       <div className="section-title">Статистика</div>
       <div className="stat-row">

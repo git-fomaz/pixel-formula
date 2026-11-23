@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import Home from './pages/Home';
 import League from './pages/League';
@@ -8,9 +8,17 @@ import Collection from './pages/Collection';
 import Calendar from './pages/Calendar';
 import Profile from './pages/Profile';
 import Reward from './pages/Reward';
+import { applyTheme, loadTheme, saveTheme, type ThemeMode } from './lib/theme';
 import './App.css';
 
 function App() {
+  const [theme, setTheme] = useState<ThemeMode>(loadTheme);
+
+  useEffect(() => {
+    applyTheme(theme);
+    saveTheme(theme);
+  }, [theme]);
+
   useEffect(() => {
     const isTelegram = !!(window as any).Telegram?.WebApp;
     if (isTelegram) {
@@ -43,7 +51,7 @@ function App() {
             <Route path="/collection" element={<Collection />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile" element={<Profile theme={theme} onThemeChange={setTheme} />} />
           </Routes>
         </main>
 

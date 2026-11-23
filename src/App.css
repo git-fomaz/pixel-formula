@@ -1,7 +1,9 @@
-/* Pixel Formula — Light iOS-style design */
+/* Pixel Formula — iOS-inspired light and dark themes */
 
 :root {
+  color-scheme: light;
   --bg: #f2f2f7;
+  --page-texture: url('/bg.jpg');
   --bg-elevated: #ffffff;
   --bg-secondary: #e5e5ea;
   --bg-tertiary: #d1d1d6;
@@ -18,6 +20,16 @@
   --mercedes: #6b7280;
   --fill: rgba(120, 120, 128, 0.12);
   --fill-secondary: rgba(120, 120, 128, 0.08);
+  --fill-tertiary: rgba(120, 120, 128, 0.05);
+  --nav-background: rgba(255, 255, 255, 0.88);
+  --nav-border: rgba(192, 57, 43, 0.25);
+  --nav-label: #6b7280;
+  --banner-bg: #f5f5f5;
+  --banner-label: #171717;
+  --banner-row: #ffffff;
+  --banner-rank: #171717;
+  --banner-points: #171717;
+  --banner-update: #5b5b5b;
   --radius-sm: 10px;
   --radius-md: 14px;
   --radius-lg: 20px;
@@ -29,13 +41,52 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #10141f;
+  --page-texture: radial-gradient(ellipse at 80% 0%, rgba(94, 42, 65, 0.23), transparent 52%),
+    radial-gradient(ellipse at 0% 90%, rgba(38, 71, 112, 0.22), transparent 55%);
+  --bg-elevated: #1e2533;
+  --bg-secondary: #30394b;
+  --bg-tertiary: #465166;
+  --separator: rgba(218, 225, 241, 0.15);
+  --label: #f5f6fb;
+  --label-secondary: rgba(229, 234, 247, 0.7);
+  --label-tertiary: rgba(229, 234, 247, 0.43);
+  --accent: #ff7971;
+  --accent-red: #ff7971;
+  --accent-green: #4ade80;
+  --accent-orange: #ffb354;
+  --accent-yellow: #ffdb64;
+  --ferrari: #f36f69;
+  --mercedes: #65738e;
+  --fill: rgba(213, 222, 244, 0.13);
+  --fill-secondary: rgba(213, 222, 244, 0.08);
+  --fill-tertiary: rgba(213, 222, 244, 0.05);
+  --nav-background: rgba(26, 32, 45, 0.93);
+  --nav-border: rgba(243, 111, 105, 0.27);
+  --nav-label: #b9c5d8;
+  --banner-bg: #1a2131;
+  --banner-label: #f5f6fb;
+  --banner-row: #2a3243;
+  --banner-rank: #833637;
+  --banner-points: #4e2733;
+  --banner-update: #b8c3d4;
+  --shadow: 0 6px 28px rgba(0, 0, 0, 0.32);
+  --shadow-soft: 0 3px 18px rgba(0, 0, 0, 0.23);
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  background: #f2f2f7 url('/bg.jpg') center / cover fixed;
+  background-color: var(--bg);
+  background-image: var(--page-texture);
+  background-position: center;
+  background-size: cover;
+  background-attachment: fixed;
   color: var(--label);
   min-height: 100vh;
   font-size: 17px;
@@ -86,9 +137,9 @@ main {
   margin: 0 0 16px;
   overflow: hidden;
   border-radius: 20px;
-  background: #f5f5f5;
+  background: var(--banner-bg);
   box-shadow: var(--shadow-soft);
-  color: #171717;
+  color: var(--banner-label);
   font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
 
@@ -138,7 +189,7 @@ main {
   align-items: center;
   gap: 4px;
   min-height: 33px;
-  background: #ffffff;
+  background: var(--banner-row);
   font-size: clamp(11px, 2.8vw, 15px);
   font-weight: 900;
   white-space: nowrap;
@@ -148,7 +199,7 @@ main {
   align-self: stretch;
   display: grid;
   place-items: center;
-  background: #171717;
+  background: var(--banner-rank);
   color: #fff;
   border-radius: 4px;
   font-size: 1.15em;
@@ -198,7 +249,7 @@ main {
   justify-content: center;
   gap: 3px;
   clip-path: polygon(11% 0, 91% 0, 100% 50%, 91% 100%, 11% 100%, 0 50%);
-  background: #171717;
+  background: var(--banner-points);
   color: #fff;
   font-size: 1.15em;
   font-variant-numeric: tabular-nums;
@@ -211,7 +262,7 @@ main {
 .championship-banner__updated {
   padding: 7px 10px 10px;
   text-align: right;
-  color: #5b5b5b;
+  color: var(--banner-update);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.3px;
@@ -267,10 +318,10 @@ main {
   transform: translateX(-50%);
   width: calc(100% - 24px);
   max-width: 456px;
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--nav-background);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(192, 57, 43, 0.25);
+  border: 1px solid var(--nav-border);
   border-radius: 28px;
   display: flex;
   justify-content: space-around;
@@ -285,7 +336,7 @@ main {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  color: var(--mercedes);
+  color: var(--nav-label);
   text-decoration: none;
   font-size: 10px;
   font-weight: 500;
@@ -309,6 +360,7 @@ main {
 
 /* Form controls */
 select,
+input:not([type]),
 input[type="text"] {
   width: 100%;
   background: var(--bg-secondary);
@@ -424,6 +476,45 @@ tr.me,
   letter-spacing: 0.8px;
   color: var(--label-secondary);
   margin: 20px 0 8px;
+}
+
+/* Profile appearance picker */
+.theme-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 5px;
+  border-radius: 14px;
+  background: var(--bg-secondary);
+}
+
+.theme-option {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--label-secondary);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.theme-option.is-active {
+  background: var(--bg-elevated);
+  border-color: var(--separator);
+  color: var(--label);
+  box-shadow: var(--shadow-soft);
+}
+
+.theme-option:focus-visible {
+  outline: 2px solid var(--ferrari);
+  outline-offset: 2px;
 }
 
 @keyframes pulse {

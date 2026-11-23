@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Pixel Formula</title>
+    <meta name="theme-color" content="#f2f2f7" />
+    <script>
+      try {
+        if (localStorage.getItem('pf:theme:v1') === 'dark') {
+          document.documentElement.dataset.theme = 'dark';
+          document.documentElement.style.colorScheme = 'dark';
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#10141f');
+        }
+      } catch (_) {}
+    </script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
