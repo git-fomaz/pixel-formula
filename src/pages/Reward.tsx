@@ -24,7 +24,7 @@ export default function Reward() {
     setStatus('');
     try {
       requestId.current ??= crypto.randomUUID();
-      const response = await fetch('/api/card-tokens', {
+      const response = await fetch('/api/score?wallet=cards', {
         method: 'POST',
         headers: { ...headers, 'Content-Type': 'application/json' },
         body: JSON.stringify({ requestId: requestId.current }),
