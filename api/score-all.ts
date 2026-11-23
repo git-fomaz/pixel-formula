@@ -20,7 +20,7 @@ export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const { raceId, secret } = req.body || {};
-  if (!raceId || secret !== process.env.SCORE_SECRET) {
+  if (!raceId || !process.env.SCORE_SECRET || secret !== process.env.SCORE_SECRET) {
     return res.status(401).json({ error: 'unauthorized or missing raceId' });
   }
 

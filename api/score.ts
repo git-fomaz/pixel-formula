@@ -7,6 +7,9 @@ function getRedis() {
 }
 
 export default async function handler(req: any, res: any) {
+  if (req.method === 'POST' && (!process.env.SCORE_SECRET || req.body?.secret !== process.env.SCORE_SECRET)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
   const redis = getRedis();
   try {
     await redis.connect();

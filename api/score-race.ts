@@ -28,6 +28,10 @@ function calculateScore(picks: string[], actual: string[]) {
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).end();
 
+  if (!process.env.SCORE_SECRET || req.body?.secret !== process.env.SCORE_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   const redis = createClient({ url: process.env.REDIS_URL });
   try {
     await redis.connect();

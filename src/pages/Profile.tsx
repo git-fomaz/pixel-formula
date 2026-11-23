@@ -3,43 +3,24 @@ import { Link } from 'react-router-dom';
 import { PF_CARDS } from '../data/cards';
 import type { ThemeMode } from '../lib/theme';
 
-function loadSummary() {
+import { fetchCardWallet, type CardWallet } from '../lib/cardTokens';
+
+function loadSummary(cardIds: string[]) {
   try {
-    const raw = localStorage.getItem('pf:rewards:v1');
-    if (!raw) return { total: 0, distinct: 0, counts: { Basic: 0, Rare: 0, Unique: 0, Masterpiece: 0 } };
-    const db = JSON.parse(raw);
-    if (db.version !== 1 || !db.awards) return { total: 0, distinct: 0, counts: { Basic: 0, Rare: 0, Unique: 0, Masterpiece: 0 } };
-    const awards = Object.values(db.awards) as any[];
-    const live = awards.filter(a => a && a.demo === false);
-    const known = live.filter(a => PF_CARDS.some(c => c.id === a.cardId));
-    const distinct = new Set(known.map(a => a.cardId)).size;
+    const db = JSON.parse(localStorage.getItem('pf:rewards:v1') || '{}');
+    const legacy = db.version === 1 ? Object.values(db.awards || {}) as any[] : [];
+    const ids = [...cardIds, ...legacy.filter(award => award && award.demo !== true).map(award => award.cardId)];
+    const known = ids.filter(id => PF_CARDS.some(card => card.id === id));
+    const distinct = new Set(known).size;
     const counts: Record<string, number> = { Basic: 0, Rare: 0, Unique: 0, Masterpiece: 0 };
     for (const a of known) {
-      const c = PF_CARDS.find(x => x.id === a.cardId);
+      const c = PF_CARDS.find(x => x.id === a);
       if (c) counts[c.rarity]++;
     }
     return { total: known.length, distinct, counts };
   } catch {
     return { total: 0, distinct: 0, counts: { Basic: 0, Rare: 0, Unique: 0, Masterpiece: 0 } };
   }
-}
-
-function loadPoints() {
-  let total = 0;
-  let races = 0;
-  try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k?.startsWith('pf:race-result:v1:')) {
-        const v = JSON.parse(localStorage.getItem(k) || '{}');
-        if (typeof v.points === 'number') {
-          total += v.points;
-          races++;
-        }
-      }
-    }
-  } catch {}
-  return { total, races };
 }
 
 const rarityColor: Record<string, string> = {
@@ -54,8 +35,12 @@ export default function Profile({ theme, onThemeChange }: { theme: ThemeMode; on
   const [nickname, setNickname] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const rewards = useMemo(loadSummary, []);
-  const pts = useMemo(loadPoints, []);
+  const [wallet, setWallet] = useState<CardWallet | null>(null);
+  const rewards = useMemo(() => loadSummary(wallet?.cardIds ?? []), [wallet]);
+
+  useEffect(() => {
+    fetchCardWallet().then(setWallet).catch(() => {});
+  }, []);
 
   useEffect(() => {
     try {
@@ -177,9 +162,15 @@ export default function Profile({ theme, onThemeChange }: { theme: ThemeMode; on
         </div>
       </div>
 
+      <div className="ios-card">
+        <strong>Токены открытия · {wallet?.balance ?? '—'}</strong>
+        <p className="muted">1 токен за каждые 20 очков в таблице лидеров.</p>
+        <Link to="/reward" className="ios-btn secondary">Открыть карточку</Link>
+      </div>
+
       <div className="section-title">Статистика</div>
       <div className="stat-row">
-        <div className="stat-box"><strong>{pts.total}</strong><small>Очки</small></div>
+        <div className="stat-box"><strong>{wallet?.points ?? '—'}</strong><small>Очки</small></div>
         <div className="stat-box"><strong>{rewards.distinct}/{PF_CARDS.length}</strong><small>Карточки</small></div>
         <div className="stat-box"><strong>{rewards.total}</strong><small>Наград</small></div>
         <div className="stat-box"><strong>—</strong><small>Место</small></div>

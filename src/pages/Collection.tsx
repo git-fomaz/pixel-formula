@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { PF_CARDS, LAS_VEGAS_2026_CARDS } from '../data/cards';
 
+import { fetchCardWallet } from '../lib/cardTokens';
+
 type Rarity = 'Basic' | 'Rare' | 'Unique' | 'Masterpiece' | 'all';
 
 function loadOwned(): Set<string> {
@@ -35,11 +37,17 @@ export default function Collection() {
   const [bonusCardId, setBonusCardId] = useState<string | null>(null);
   const [bonusReason, setBonusReason] = useState<string | null>(null);
 
+  const [tokenCards, setTokenCards] = useState<string[]>([]);
+  useEffect(() => {
+    fetchCardWallet().then(wallet => setTokenCards(wallet.cardIds)).catch(() => {});
+  }, []);
+
   const owned = useMemo(() => {
     const ids = loadOwned();
+    tokenCards.forEach(id => ids.add(id));
     if (bonusCardId) ids.add(bonusCardId);
     return ids;
-  }, [bonusCardId]);
+  }, [bonusCardId, tokenCards]);
 
   useEffect(() => {
     try {
