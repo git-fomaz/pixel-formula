@@ -340,7 +340,7 @@ export default function Predict() {
 
             <div style={{ fontWeight: 600, marginBottom: 6 }}>Гонка (×1)</div>
             <p className="muted" style={{ margin: '0 0 8px', fontSize: 14 }}>
-              Прогноз — топ-5 в порядке финиша. Очки за точное попадание места:
+              Прогноз — топ-5 в порядке финиша. За точную позицию начисляются очки по таблице.
             </p>
             <ul style={{ margin: '0 0 12px', paddingLeft: 18, fontSize: 14 }}>
               <li>1 место — 15 очков</li>
@@ -349,7 +349,10 @@ export default function Predict() {
               <li>4 место — 8 очков</li>
               <li>5 место — 8 очков</li>
             </ul>
-            <p className="muted" style={{ margin: '0 0 4px', fontSize: 14 }}>Бонус за количество точных попаданий:</p>
+            <p className="muted" style={{ margin: '0 0 8px', fontSize: 14 }}>
+              Каждый пилот из топ-5 на другой позиции приносит 4 очка. За пилота вне топ-5 начисляется 0 очков.
+            </p>
+            <p className="muted" style={{ margin: '0 0 4px', fontSize: 14 }}>Бонус начисляется за точные позиции</p>
             <ul style={{ margin: '0 0 16px', paddingLeft: 18, fontSize: 14 }}>
               <li>2 точных — +2</li>
               <li>3 точных — +5</li>
@@ -359,13 +362,13 @@ export default function Predict() {
 
             <div style={{ fontWeight: 600, marginBottom: 6 }}>Квалификация (×0.5)</div>
             <p className="muted" style={{ margin: '0 0 12px', fontSize: 14 }}>
-              Та же схема, но все очки (за места и бонус) умножаются на 0.5.
+              Все очки и бонусы делятся пополам. Пилот из топ-5 на другой позиции приносит 2 очка.
             </p>
 
             <div style={{ fontWeight: 600, marginBottom: 6 }}>Примеры</div>
             <ul style={{ margin: 0, paddingLeft: 18, fontSize: 14 }}>
-              <li>1-е и 3-е в гонке → 15 + 10 + бонус 2 = 27</li>
-              <li>Весь топ-5 в гонке → 73 очка</li>
+              <li>Две точные позиции (1-я и 3-я) и один пилот из топ-5 на другой позиции в гонке → 15 + 10 + 4 + 2 бонусных = 31</li>
+              <li>Все пять позиций угаданы в гонке → 73 очка</li>
               <li>1-е и 2-е в квалификации → 14.5</li>
             </ul>
           </div>
