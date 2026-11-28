@@ -9,7 +9,8 @@ export default async function handler(req: any, res: any) {
     const redis = createClient({ url: process.env.REDIS_URL });
     await redis.connect();
 
-    const key = round === 'last' ? `f1:${SEASON}:last` : `f1:${SEASON}:round:${round}`;
+    const key = round === '22-q' ? `pf:${SEASON}:results:qatar-2026-q` :
+      round === 'last' ? `f1:${SEASON}:last` : `f1:${SEASON}:round:${round}`;
     const raw = await redis.get(key);
     await redis.quit();
 
